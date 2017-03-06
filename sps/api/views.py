@@ -1,5 +1,6 @@
 from aiohttp import web
 
+from . import db
 
 class SongsApiView:
 
@@ -20,12 +21,30 @@ class SongsApiView:
 
 
     @staticmethod
-    def list(request):
-        return web.json_response({'type': 'LIST'})
+    async def list(request):
+        artist = request.rel_url.query.get('artist', '')
+        artist = int(artist) if artist.isdigit() else None
+        notext = True if 'notext' in request.rel_url.query else None
+
+        artist_to_text = True if 'withnames' in request.rel_url.query else None
+
+        songs = await db.get_songs(artist, artist_to_text, notext)
+        return web.json_response(songs)
 
     @staticmethod
-    def retrieve(request):
-        return web.json_response({'type':'RETRIEVE'})
+    async def retrieve(request):
+        song_id = request.match_info['id']
+        if song_id.isdigit():
+            song_id = int(song_id)
+        else:
+            return web.HTTPNotFound()
+
+        artist_to_text = True if 'withnames' in request.rel_url.query else None
+        result = await db.get_single_song(song_id, artist_to_text)
+        if result is None:
+            return web.HTTPNotFound()
+        else:
+            return web.json_response(result)
 
     @staticmethod
     def create(request):

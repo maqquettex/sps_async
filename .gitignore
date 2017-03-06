@@ -90,3 +90,7 @@ ENV/
 
 # PyCharm (JetBrains) IDE config
 .idea/
+
+
+# Link to config
+sps/config.yaml
