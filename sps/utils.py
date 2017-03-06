@@ -1,6 +1,5 @@
 import yaml
 from aiohttp import web
-from asyncpgsa import pg
 
 
 async def trailing_slash_redirect_middleware(app, handler):

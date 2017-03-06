@@ -15,10 +15,6 @@ class SongsApiView:
 
         app.router.add_get(base_url, SongsApiView.list, name='songs_list')
         app.router.add_get(base_url +'/{id}', SongsApiView.retrieve, name='songs_retrieve')
-        app.router.add_post(base_url, SongsApiView.create, name='songs_create')
-        app.router.add_post(base_url + '/{id}', SongsApiView.update, name='songs_update')
-        app.router.add_delete(base_url + '/{id}', SongsApiView.delete, name='songs_delete')
-
 
     @staticmethod
     async def list(request):
@@ -46,25 +42,51 @@ class SongsApiView:
         else:
             return web.json_response(result)
 
-    @staticmethod
-    def create(request):
-        # db.song.insert().values(
-        #     artist_id=int(post_data['artist']),
-        #     title=post_data['title'],
-        #     text=post_data['text'],
-        # )
-        redirect_url = request.app.router['songs_list'].url()
-        return web.HTTPFound(redirect_url)
+
+class ArtistsApiView:
+
+    base_url = '/artists'
 
     @staticmethod
-    def update(request):
-        redirect_url = request.app.router['songs_list'].url()
-        return web.HTTPFound(redirect_url)
+    def add_routes(app, prefix=None):
+        if prefix:
+            base_url = prefix + ArtistsApiView.base_url
+        else:
+            base_url = ArtistsApiView.base_url
+
+        app.router.add_get(base_url, ArtistsApiView.list, name='artists_list')
+        app.router.add_get(base_url +'/{id}', ArtistsApiView.retrieve, name='artists_retrieve')
 
     @staticmethod
-    def delete(request):
-        redirect_url = request.app.router['songs_list'].url()
-        return web.HTTPFound(redirect_url)
+    async def list(request):
+        artists = await db.get_artists()
+        return web.json_response(artists)
 
+    @staticmethod
+    async def retrieve(request):
+        artist_id = request.match_info['id']
+        if artist_id.isdigit():
+            artist_id = int(artist_id)
+        else:
+            return web.HTTPNotFound()
 
+        songs = request.rel_url.query.get('songs', None)
+        print(songs, 'get param')
+        if songs == 'full':
+            print('1')
+            artist = await db.get_single_artist(
+                artist_id, select_songs=True, full_songs=True
+            )
+        elif songs == 'true':
+            print('2')
+            artist = await db.get_single_artist(
+                artist_id, select_songs=True
+            )
+        else:
+            print('0')
+            artist = await db.get_single_artist(artist_id)
 
+        if artist is None:
+            return web.HTTPNotFound()
+        else:
+            return web.json_response(artist)

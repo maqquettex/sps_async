@@ -88,6 +88,43 @@ async def get_single_song(song_id, artist_to_text=None):
     return result_song
 
 
-async def get_all_artists():
-    query = select([artist.c.id, artist.c.name]).select_from(artist)
-    return query
+async def get_artists():
+    query = artist.select()
+
+    results = []
+    async with pg.query(query) as cursor:
+        async for row in cursor:
+            results.append({
+                'id': row.id,
+                'name': row.name,
+            })
+
+    return results
+
+async def get_single_artist(artist_id, select_songs=None, full_songs=None):
+    print(select_songs, full_songs)
+    query = artist.select().where(artist.c.id == artist_id)
+    row = await pg.fetchrow(query)
+    if not row:
+        return None
+
+    result_artist = {
+        'id': row.id,
+        'name': row.name
+    }
+
+    if select_songs is True:
+        songs = []
+        songs_query = song.select().where(song.c.artist_id == artist_id)
+        async with pg.query(songs_query) as cursor:
+            async for row in cursor:
+                if full_songs is True:
+                    songs.append({
+                        'id': row.id,
+                        'title': row.title,
+                        'text': row.text,
+                    })
+                else:
+                    songs.append(row.id)
+        result_artist['songs'] = songs
+    return result_artist
