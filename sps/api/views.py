@@ -2,6 +2,7 @@ from aiohttp import web
 
 from . import db
 
+
 class SongsApiView:
 
     base_url = '/songs'
@@ -21,10 +22,9 @@ class SongsApiView:
         artist = request.rel_url.query.get('artist', '')
         artist = int(artist) if artist.isdigit() else None
         notext = True if 'notext' in request.rel_url.query else None
-
         artist_to_text = True if 'withnames' in request.rel_url.query else None
 
-        songs = await db.get_songs(artist, artist_to_text, notext)
+        songs = await db.get_songs(request.app['pool'], artist, artist_to_text, notext)
         return web.json_response(songs)
 
     @staticmethod
@@ -36,7 +36,7 @@ class SongsApiView:
             return web.HTTPNotFound()
 
         artist_to_text = True if 'withnames' in request.rel_url.query else None
-        result = await db.get_single_song(song_id, artist_to_text)
+        result = await db.get_single_song(request.app['pool'], song_id, artist_to_text)
         if result is None:
             return web.HTTPNotFound()
         else:
@@ -59,7 +59,7 @@ class ArtistsApiView:
 
     @staticmethod
     async def list(request):
-        artists = await db.get_artists()
+        artists = await db.get_artists(request.app['pool'])
         return web.json_response(artists)
 
     @staticmethod
@@ -71,20 +71,16 @@ class ArtistsApiView:
             return web.HTTPNotFound()
 
         songs = request.rel_url.query.get('songs', None)
-        print(songs, 'get param')
         if songs == 'full':
-            print('1')
             artist = await db.get_single_artist(
-                artist_id, select_songs=True, full_songs=True
+                request.app['pool'], artist_id, select_songs=True, full_songs=True
             )
         elif songs == 'true':
-            print('2')
             artist = await db.get_single_artist(
-                artist_id, select_songs=True
+                request.app['pool'], artist_id, select_songs=True
             )
         else:
-            print('0')
-            artist = await db.get_single_artist(artist_id)
+            artist = await db.get_single_artist(request.app['pool'], artist_id)
 
         if artist is None:
             return web.HTTPNotFound()

@@ -16,7 +16,9 @@ async def trailing_slash_redirect_middleware(app, handler):
     return redirect_handler
 
 
-async def load_config():
+def load_config():
+    # TODO: better way to handle path of config
+    # TODO: trafaret add
     with open('sps/config.yaml', 'rt') as file:
         config = yaml.load(file)
     return config

@@ -5,7 +5,7 @@ from .routes import setup_routes
 from .db import create_tables_sql
 
 
-async def register_in_app(app, prefix=None):
+def register_in_app(app, prefix=None):
     setup_routes(app, prefix)
     aiohttp_jinja2.setup(
         app, loader=jinja2.PackageLoader('api', 'templates')

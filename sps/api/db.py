@@ -1,8 +1,5 @@
-import re
 import sqlalchemy as sa
-from sqlalchemy import select, insert
 from sqlalchemy.schema import CreateTable
-from asyncpgsa import pg
 import asyncpg
 
 
@@ -26,24 +23,25 @@ song = sa.Table(
 
 
 async def create_tables_sql(app):
-
     for name, table in meta.tables.items():
-        async with pg.transaction() as conn:
+        async with app['pool'].acquire() as conn:
             try:
                 await conn.execute(CreateTable(table))
             except asyncpg.exceptions.DuplicateTableError:
                 pass
 
 
-async def get_songs(artist_id=None, artists_to_text=None, notext=None):
+async def get_songs(pool, artist_id=None, artists_to_text=None, notext=None):
+
     query = song.select()
+
 
     if artist_id:
         query = query.where(song.c.artist_id == artist_id)
 
     results = []
-    async with pg.query(query) as cursor:
-        async for row in cursor:
+    async with pool.acquire() as conn:
+        for row in await conn.fetch(query):
             results.append({
                 'artist': row.artist_id,
                 'title': row.title,
@@ -53,58 +51,61 @@ async def get_songs(artist_id=None, artists_to_text=None, notext=None):
 
     if artists_to_text is True:
         all_artists = dict()
-        async with pg.query(artist.select()) as cursor:
-            async for row in cursor:
+        async with pool.transaction() as conn:
+            for row in await conn.fetch(artist.select()):
                 all_artists[row.id] = row.name
 
-        for song in results:
-            song['artist'] = all_artists[song['artist']]
+        for result in results:
+            result['artist'] = all_artists[result['artist']]
 
     if notext is True:
-        for song in results:
-            song.pop('text')
+        for result in results:
+            result.pop('text')
 
     return results
 
-async def get_single_song(song_id, artist_to_text=None):
+async def get_single_song(pool, song_id, artist_to_text=None):
     query = song.select().where(song.c.id == song_id)
     result_song = dict()
-    async with pg.query(query) as cursor:
-        async for row in cursor:
-            result_song.update({
-                'artist': row.artist_id,
-                'title': row.title,
-                'id': row.id,
-                'text': row.text
-            })
+    async with pool.transaction() as conn:
+        song_row = await conn.fetchrow(query)
+
+    if not song_row:
+        return None
+
+    result_song.update({
+        'artist': song_row.artist_id,
+        'title': song_row.title,
+        'id': song_row.id,
+        'text': song_row.text
+    })
     if result_song == {}:
         return None
 
     if artist_to_text:
         artist_query = artist.select().where(artist.c.id == result_song['artist'])
-        async with pg.query(artist_query) as cursor:
-            async for row in cursor:
-                result_song['artist'] = row.name
+        async with pool.transaction() as conn:
+            artist_row = await conn.fetchrow(artist_query)
+
+        result_song['artist'] = artist_row.name
     return result_song
 
 
-async def get_artists():
+async def get_artists(pool):
     query = artist.select()
 
-    results = []
-    async with pg.query(query) as cursor:
-        async for row in cursor:
-            results.append({
-                'id': row.id,
-                'name': row.name,
-            })
+    async with pool.transaction() as conn:
+        results = await conn.fetch(query)
 
-    return results
+    return [{'id': row.id,
+             'name': row.name,
+             } for row in results]
 
-async def get_single_artist(artist_id, select_songs=None, full_songs=None):
-    print(select_songs, full_songs)
+async def get_single_artist(pool, artist_id, select_songs=None, full_songs=None):
     query = artist.select().where(artist.c.id == artist_id)
-    row = await pg.fetchrow(query)
+    async with pool.transaction() as conn:
+        row = await conn.fetchrow(query)
+
     if not row:
         return None
 
@@ -116,15 +117,18 @@ async def get_single_artist(artist_id, select_songs=None, full_songs=None):
     if select_songs is True:
         songs = []
         songs_query = song.select().where(song.c.artist_id == artist_id)
-        async with pg.query(songs_query) as cursor:
-            async for row in cursor:
-                if full_songs is True:
-                    songs.append({
-                        'id': row.id,
-                        'title': row.title,
-                        'text': row.text,
-                    })
-                else:
-                    songs.append(row.id)
+        async with pool.transaction() as conn:
+            results = await conn.fetch(songs_query)
+
+        for row in results:
+            if full_songs is True:
+                songs.append({
+                    'id': row.id,
+                    'title': row.title,
+                    'text': row.text,
+                })
+            else:
+                songs.append(row.id)
         result_artist['songs'] = songs
+
     return result_artist
