@@ -6,6 +6,9 @@ from .db import create_tables_sql
 
 
 def register_in_app(app, prefix=None):
+    app['apps'].update({
+        'api': {}  # api`s app dictionary
+    })
     setup_routes(app, prefix)
     aiohttp_jinja2.setup(
         app, loader=jinja2.PackageLoader('api', 'templates')
