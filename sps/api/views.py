@@ -9,10 +9,9 @@ class SongsApiView:
 
     @staticmethod
     def add_routes(app, prefix=None):
+        base_url = SongsApiView.base_url
         if prefix:
-            base_url = prefix + SongsApiView.base_url
-        else:
-            base_url = SongsApiView.base_url
+            base_url = '/' + prefix + base_url
 
         app.router.add_get(base_url, SongsApiView.list, name='songs_list')
         app.router.add_get(base_url +'/{id}', SongsApiView.retrieve, name='songs_retrieve')
@@ -49,10 +48,9 @@ class ArtistsApiView:
 
     @staticmethod
     def add_routes(app, prefix=None):
+        base_url = SongsApiView.base_url
         if prefix:
-            base_url = prefix + ArtistsApiView.base_url
-        else:
-            base_url = ArtistsApiView.base_url
+            base_url = '/' + prefix + base_url
 
         app.router.add_get(base_url, ArtistsApiView.list, name='artists_list')
         app.router.add_get(base_url +'/{id}', ArtistsApiView.retrieve, name='artists_retrieve')

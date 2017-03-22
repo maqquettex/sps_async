@@ -5,6 +5,7 @@ import trafaret as tr
 from aiohttp import web
 
 import api
+import admin
 import utils
 
 
@@ -12,7 +13,7 @@ async def init_application(loop):
     # SECTION: Creating Application instance, basic init configuration
     middlewares = [
         # List of middlewares is here
-        utils.trailing_slash_redirect_middleware,
+        utils.middlewares.trailing_slash_redirect_middleware,
     ]
     app = web.Application(loop=loop, middlewares=middlewares)
 
@@ -29,7 +30,7 @@ async def init_application(loop):
         tr.Key('host'): tr.String(regex=ipv4_regex),
         tr.Key('port'): tr.Int(),
     })
-    config = utils.detect_config(__file__, PROJECT_CONFIG_TRAFARET)
+    config = utils.conf.detect_config(__file__, PROJECT_CONFIG_TRAFARET)
 
     # saving config
     app['conf'] = config
@@ -38,8 +39,10 @@ async def init_application(loop):
     # SECTION: sub-apps
     app['apps'] = {}  # dictionary for apps to store any info at
     # Registering apps
-    api.register_in_app(app, prefix='/api')
+    admin.register_admin(app, prefix='admin')
+    api.register_in_app(app, prefix='api')
 
+    admin.initialize()
     return app
 
 def main():
