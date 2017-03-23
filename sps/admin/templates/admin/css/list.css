@@ -1,0 +1,32 @@
+{% block extra_css %}
+h2 {
+    text-align: center;
+    margin: 10px;
+    padding-top: 20px;
+}
+div.table {
+    margin: 0 -1px 0;
+    display: table;
+    width: 602px;
+}
+.table-row {
+    display: table-row;
+}
+.table-row:hover {
+    background: #f0be92;
+}
+.table-row#header {
+    font-weight: bold;
+    text-align: center;
+}
+.table-row div {
+    display: table-cell;
+    padding: 5px;
+    border: 1px solid black;
+}
+.for_id {
+    text-align: center;
+    max-width: 50px;
+}
+
+{% endblock %}

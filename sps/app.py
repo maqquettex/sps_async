@@ -2,6 +2,8 @@ import asyncio
 import asyncpgsa
 import uvloop
 import trafaret as tr
+import aiohttp_jinja2
+import jinja2
 from aiohttp import web
 
 import api
@@ -39,10 +41,11 @@ async def init_application(loop):
     # SECTION: sub-apps
     app['apps'] = {}  # dictionary for apps to store any info at
     # Registering apps
-    admin.register_admin(app, prefix='admin')
+    admin.register_in_app(app, prefix='admin')
     api.register_in_app(app, prefix='api')
 
-    admin.initialize()
+    utils.setup_jinja2(app, __file__)
+
     return app
 
 def main():

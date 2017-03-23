@@ -1,0 +1,30 @@
+{% extends 'admin/base.html' %}
+
+{% block title %} Songs list {% endblock %}
+
+{% block extra_css %}
+    {% include 'admin/css/list.css' %}
+{% endblock %}
+
+{% block content %}
+
+    <h2>Songs list</h2>
+    <div class="table">
+        <div class="table-row" id="header">
+            <div class="for_id">id</div>
+            <div class="for_id">artist_id</div>
+            <div>artist</div>
+            <div>title</div>
+        </div>
+
+        {% for song in songs %}
+            <a class="table-row" class="to_retrieve" href="/admin/songs/{{ song['id'] }}">
+                    <div class="for_id">{{ song['id'] }}</div>
+                    <div class="for_id">{{ song['artist_id'] }}</div>
+                    <div>{{ song['artist_name'] }}</div>
+                    <div>{{ song['title'] }}</div>
+            </a>
+
+        {% endfor %}
+    </div>
+{% endblock %}

@@ -1,0 +1,32 @@
+label {
+    width: 100%;
+    display: block;
+    margin: 10px;
+}
+input, select {
+    display: block;
+    height: 20px;
+}
+
+select {
+    height: 30px;
+}
+
+input[type=submit], input#button_back {
+    display: inline-block;
+    height: 30px;
+    width: 200px;
+    margin-right: 100px;
+    font-size: 16px;
+}
+
+input#button_back {
+    margin-right: 10px;
+    float: right;
+}
+
+textarea {
+    width: 540px;
+    min-width: 540px;
+    max-width: 540px;
+}
