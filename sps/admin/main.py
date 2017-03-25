@@ -14,11 +14,21 @@ class Admin:
         Admin.add_post = app.router.add_post
         Admin.add_delete = app.router.add_delete
 
-    def register_table(self, table):
+    def register_table(self, table, key_field=None, **kwargs):
         if not isinstance(table, sa.Table):
             raise TypeError('You must pass sqlalchemy.Table instance to admin`s '
                             'register_table function')
-        new_admin_view = AdminAPIView(table=table, pool=self.app['pool'])
+        if key_field is None:
+            try_id = getattr(table.columns, 'id', None)
+            if not isinstance(try_id, sa.Column):
+                raise ValueError(
+                    'For table {} key_field is not specified and '
+                    'id column does not exist!'.format(table.name)
+                )
+            key_field = 'id'
+
+
+        new_admin_view = AdminAPIView(table=table, pool=self.app['pool'], key_field=key_field)
 
         admin_name = 'admin-' + table.name
         base_url = '/admin/{}'.format(table.name)
