@@ -1,3 +1,4 @@
+import types
 import sqlalchemy as sa
 from sqlalchemy.sql import sqltypes
 from aiohttp import web
@@ -14,25 +15,30 @@ class AdminAPIView:
         self.field_names = [str(f.name) for f in self.fields]
         self.key_field = key_field
 
-    def get_key(self, request):
-        key = request.match_info['key']
-        key_column = getattr(self.fields, self.key_field)
-        key_type = key_column.type
+        # Assigning get_key function
+        key_type = getattr(self.fields, self.key_field).type
         if isinstance(key_type, sqltypes.Integer):
-            return int(key)
+            def get_key(request):
+                key = request.match_info['key']
+                return int(key)
         elif isinstance(key_type, sqltypes.Text):
-            return str(key)
-        elif isinstance(key_type, sqltypes.String):
-            if len(key) < key_type.length:
+            def get_key(request):
+                key = request.match_info['key']
                 return str(key)
-            # Key is longer that man length of field
-            raise web.HTTPNotFound()
-        raise ValueError(
-            'Unsupported type {} of key field for table {}'.format(
-                type(key_column), self.table
+        elif isinstance(key_type, sqltypes.String):
+            def get_key(request):
+                key = request.match_info['key']
+                if len(key) < key_type.length:
+                    return str(key)
+                # Key is longer that man length of field
+                raise web.HTTPNotFound()
+        else:
+            raise ValueError(
+                'Unsupported type {} of key field for table {}'.format(
+                    key_type, self.table
+                )
             )
-        )
-
+        self.get_key = get_key
 
     async def list(self, request):
         query = self.table.select()
