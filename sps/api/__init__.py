@@ -13,7 +13,7 @@ def register_in_app(app, prefix=None):
     })
 
     if 'admin' in app['apps']:
-        app.admin.register_table(song, key_field='title')
+        app.admin.register_table(song, key_field='id')
         app.admin.register_table(artist, key_field='id')
 
     setup_routes(app, prefix)

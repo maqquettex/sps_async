@@ -1,5 +1,5 @@
 import sqlalchemy as sa
-from .views import AdminAPIView
+from .views.api import AdminAPIView
 
 class Admin:
 
@@ -38,5 +38,4 @@ class Admin:
         self.add_post(base_url, new_admin_view.create, name=admin_name + '-create')
         self.add_post(base_url + '/{key}', new_admin_view.update, name=admin_name + '-update')
 
-        self.add_delete(base_url, new_admin_view.delete_many, name=admin_name + '-delete-many')
         self.add_delete(base_url + '/{key}', new_admin_view.delete, name=admin_name + '-delete')
