@@ -12,6 +12,10 @@ def register_in_app(app, prefix=None):
         'api': {}
     })
 
+    if 'admin' in app['apps']:
+        app.admin.register_table(song)
+        app.admin.register_table(artist)
+
     setup_routes(app, prefix)
     aiohttp_jinja2.setup(
         app, loader=jinja2.PackageLoader('api', 'templates')
