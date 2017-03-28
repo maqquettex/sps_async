@@ -8,7 +8,7 @@ from admin.validations import *
 
 class AdminAPIView:
 
-    def __init__(self, table, pool, key_field):
+    def __init__(self, pool, table, key_field):
         self.table = table
         self.pool = pool
         self.fields = self.table.columns

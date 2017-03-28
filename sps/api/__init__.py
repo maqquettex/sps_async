@@ -13,8 +13,12 @@ def register_in_app(app, prefix=None):
     })
 
     if 'admin' in app['apps']:
-        app.admin.register_table(song, key_field='id')
-        app.admin.register_table(artist, key_field='id')
+        app.admin.register_table(song,
+                                 key_field='id',
+                                 list_fields=['id', 'title', 'artist_id'])
+        app.admin.register_table(artist,
+                                 key_field='id',
+                                 list_fields=['id', 'name'])
 
     setup_routes(app, prefix)
     aiohttp_jinja2.setup(
