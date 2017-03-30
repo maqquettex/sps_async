@@ -7,8 +7,9 @@ import jinja2
 from aiohttp import web
 
 import api
-import admin
 import utils
+from utils import admin as admin_utils
+import aiohttp_admin
 
 
 async def init_application(loop):
@@ -41,10 +42,11 @@ async def init_application(loop):
     # SECTION: sub-apps
     app['apps'] = {}  # dictionary for apps to store any info at
     # Registering apps
-    admin.register_in_app(app, prefix='admin')
     api.register_in_app(app, prefix='api')
 
     utils.setup_jinja2(app, __file__)
+    admin = await admin_utils.get_admin_subapp(app, loop)
+    app.add_subapp('/admin', admin)
 
     return app
 
