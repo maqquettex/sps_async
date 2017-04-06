@@ -1,0 +1,27 @@
+version: '2'
+
+services:
+  db:
+    image: postgres:9.3
+    environment:
+      - POSTGRES_USER=sps_async
+      - POSTGRES_PASSWORD=djangochannels
+      - POSTGRES_DB=sps_async
+
+    volumes:
+      - ./dbdata:/var/lib/postgresql/data
+
+
+  aiohttp:
+    image: sps/aiohttp
+    command: python manage.py
+    working_dir: /sps
+    volumes:
+      - ./sps:/sps
+      - ./configs/develop.yaml:/sps/config.yaml
+    ports:
+      - "4000:4000"
+    depends_on:
+      - db
+
+

@@ -1,15 +1,11 @@
 import asyncio
 import asyncpgsa
-import uvloop
 import trafaret as tr
-import aiohttp_jinja2
-import jinja2
 from aiohttp import web
 
 import api
 import utils
 from utils import admin as admin_utils
-import aiohttp_admin
 
 
 async def init_application(loop):
@@ -28,6 +24,8 @@ async def init_application(loop):
                 'user': tr.String(),
                 'password': tr.String(),
                 'database': tr.String(),
+                'host': tr.String(),
+                'port': tr.Int(),
             }),
         # regex for ipv4 address
         tr.Key('host'): tr.String(regex=ipv4_regex),
@@ -51,8 +49,7 @@ async def init_application(loop):
     return app
 
 def main():
-    loop = uvloop.new_event_loop()
-    asyncio.set_event_loop(loop)
+    loop = asyncio.get_event_loop()
 
     app = loop.run_until_complete(init_application(loop))
     web.run_app(app,

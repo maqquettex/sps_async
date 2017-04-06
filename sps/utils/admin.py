@@ -33,7 +33,7 @@ async def init_admin_engine(loop, db_conf):
         database=db_conf.get('database'),
         user=db_conf.get('user'),
         password=db_conf.get('password'),
-
+        host=db_conf.get('host'),
     )
     return engine
 

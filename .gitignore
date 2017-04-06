@@ -92,5 +92,5 @@ ENV/
 .idea/
 
 
-# Link to config
-sps/config.yaml
+# Docker volumes
+dbdata

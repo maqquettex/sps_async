@@ -1,7 +1,9 @@
 postgres:
-  database: sps
-  user: postgres
-  password: tassadar
+  database: sps_async
+  user: sps_async
+  password: djangochannels
+  host: db
+  port: 5432
 
 host: 0.0.0.0
 port: 4000
