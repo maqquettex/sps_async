@@ -92,5 +92,10 @@ ENV/
 .idea/
 
 
-# Link to config
-sps/config.yaml
+# ~~~~~ Docker ~~~~~
+
+# db volume
+dbdata
+
+# symbolic link to compose config
+docker-compose.yml

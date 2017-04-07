@@ -1,15 +1,11 @@
+import os
 import asyncio
 import asyncpgsa
-import uvloop
-import trafaret as tr
-import aiohttp_jinja2
-import jinja2
 from aiohttp import web
 
 import api
 import utils
 from utils import admin as admin_utils
-import aiohttp_admin
 
 
 async def init_application(loop):
@@ -21,23 +17,11 @@ async def init_application(loop):
     app = web.Application(loop=loop, middlewares=middlewares)
 
     # SECTION: Configuring project
-    ipv4_regex = r'^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$'
-    PROJECT_CONFIG_TRAFARET = tr.Dict({
-        tr.Key('postgres'):
-            tr.Dict({
-                'user': tr.String(),
-                'password': tr.String(),
-                'database': tr.String(),
-            }),
-        # regex for ipv4 address
-        tr.Key('host'): tr.String(regex=ipv4_regex),
-        tr.Key('port'): tr.Int(),
-    })
-    config = utils.conf.detect_config(__file__, PROJECT_CONFIG_TRAFARET)
-
+    db_config = utils.conf.get_db_config()
+    print(db_config)
     # saving config
-    app['conf'] = config
-    app['pool'] = await asyncpgsa.create_pool(**config['postgres'])
+    app['conf'] = {'postgres': db_config}
+    app['pool'] = await asyncpgsa.create_pool(**db_config)
 
     # SECTION: sub-apps
     app['apps'] = {}  # dictionary for apps to store any info at
@@ -51,13 +35,16 @@ async def init_application(loop):
     return app
 
 def main():
-    loop = uvloop.new_event_loop()
-    asyncio.set_event_loop(loop)
+    loop = asyncio.get_event_loop()
 
     app = loop.run_until_complete(init_application(loop))
+    print(
+        os.getenv('SERVER_HOST', '127.0.0.1'),
+        int(os.getenv('SERVER_PORT', 4000))
+    )
     web.run_app(app,
-                host=app['conf']['host'],
-                port=app['conf']['port'])
+                host=os.getenv('SERVER_HOST', '127.0.0.1'),
+                port=int(os.getenv('SERVER_PORT', 4000)))
 
 if __name__ == '__main__':
     main()

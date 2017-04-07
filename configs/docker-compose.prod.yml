@@ -1,0 +1,19 @@
+version: "3"
+
+services:
+  db:
+    image: postgres:9.3
+    env_file:
+      - ./configs/postgres.env
+    volumes:
+      - ./dbdata:/var/lib/postgresql/data
+
+
+  aiohttp:
+    build: .
+    env_file:
+      - ./configs/postgres.env
+    depends_on:
+      - db
+    links:
+      - db:docker_db
