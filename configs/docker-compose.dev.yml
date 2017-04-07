@@ -1,0 +1,21 @@
+version: "3"
+
+services:
+  db:
+    image: postgres:9.3
+    env_file:
+      - ./configs/postgres.env
+
+  aiohttp:
+    build: .
+    env_file:
+      - ./configs/postgres.env
+    environment:
+      - SERVER_HOST=0.0.0.0
+      - SERVER_PORT=4000
+    depends_on:
+      - db
+    links:
+      - db:docker_db
+    ports:
+      - "4000:4000"

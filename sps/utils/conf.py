@@ -1,20 +1,19 @@
-import yaml
+import os
 import pathlib
 
 import jinja2
 import aiohttp_jinja2
 
 
-def detect_config(file_path, trafaret, config_name='config.yaml'):
+def get_db_config():
+    return {
+        'user': os.getenv('POSTGRES_USER', 'postgres'),
+        'password': os.getenv('POSTGRES_PASSWORD', ''),
+        'host': os.getenv('POSTGRES_HOST', 'localhost'),
+        'port': os.getenv('POSTGRES_PORT', 5432),
+        'database': os.getenv('POSTGRES_DB', 'sps'),
+    }
 
-    dir_to_explore = pathlib.Path(file_path).parent
-    conf_path = dir_to_explore / config_name
-
-    with open(conf_path, 'rt') as file:
-        config = yaml.load(file)
-    trafaret.check(config)
-
-    return config
 
 def setup_jinja2(app, app_file_path):
     base_dir = pathlib.Path(app_file_path).parent

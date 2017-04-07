@@ -92,5 +92,10 @@ ENV/
 .idea/
 
 
-# Docker volumes
+# ~~~~~ Docker ~~~~~
+
+# db volume
 dbdata
+
+# symbolic link to compose config
+docker-compose.yml
