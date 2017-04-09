@@ -1,20 +1,40 @@
-PROJECT_DIR=pwd
+PROJECT_DIR=$(shell pwd)
 POSTGRES_USER=sps_admin
 POSTGRES_PASSWORD=djangochannels
 POSTGRES_DB=sps
 POSTGRES_HOST=docker_db
 
 all:
-	docker-compose up --build -d
+	docker-compose up -d db
+	@sleep 3
+	docker-compose up --build -d aiohttp
+
+up:
+	docker-compose up
+
+restart:
+	docker-compose restart aiohttp
 
 stop:
 	docker-compose stop
 
-link_dev:
-	ln -s $(PROJECT_DIR)/configs/docker-compose.dev.yml $(PROJECT_DIR)/docker-compose.yml
+conf_dev:
+	cp $(PROJECT_DIR)/configs/dev/docker-compose.yml $(PROJECT_DIR)/docker-compose.yml
+	cp $(PROJECT_DIR)/configs/dev/Dockerfile $(PROJECT_DIR)/Dockerfile
+	cp $(PROJECT_DIR)/configs/dev/postgres.env $(PROJECT_DIR)/postgres.env
 
-link_prod:
-	ln -s $(PROJECT_DIR)/configs/docker-compose.prod.yml $(PROJECT_DIR)/docker-compose.yml
+conf_prod:
+	cp $(PROJECT_DIR)/configs/prod/docker-compose.yml $(PROJECT_DIR)/docker-compose.yml
+	cp $(PROJECT_DIR)/configs/prod/Dockerfile $(PROJECT_DIR)/Dockerfile
+	cp $(PROJECT_DIR)/configs/prod/postgres.env $(PROJECT_DIR)/postgres.env
 
-dump_db:
+dump:
 	docker-compose exec db pg_dump $(POSTGRES_DB) -U $(POSTGRES_USER) > sps-$(shell date +%Y-%m-%d-%H:%M:%S).sql
+
+dump_init:
+	docker-compose exec db pg_dump $(POSTGRES_DB) -U $(POSTGRES_USER) > init_data_v2.sql
+
+clean:
+	docker-compose stop
+	docker-compose rm -vf
+	docker rmi $(docker images | grep "^<none>" | awk "{print $3}")

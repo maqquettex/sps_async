@@ -98,4 +98,6 @@ ENV/
 dbdata
 
 # symbolic link to compose config
-docker-compose.yml
+/docker-compose.yml
+/Dockerfile
+/postgres.env

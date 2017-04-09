@@ -18,6 +18,7 @@ class SongsApiView:
 
     @staticmethod
     async def list(request):
+        print(3)
         artist = request.rel_url.query.get('artist', '')
         artist = int(artist) if artist.isdigit() else None
         notext = True if 'notext' in request.rel_url.query else None

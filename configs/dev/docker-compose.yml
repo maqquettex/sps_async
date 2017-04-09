@@ -4,15 +4,20 @@ services:
   db:
     image: postgres:9.3
     env_file:
-      - ./configs/postgres.env
+      - postgres.env
+    volumes:
+      - ./db_data:/docker-entrypoint-initdb.d
 
   aiohttp:
     build: .
     env_file:
-      - ./configs/postgres.env
+      - postgres.env
     environment:
       - SERVER_HOST=0.0.0.0
       - SERVER_PORT=4000
+      - PYTHONUNBUFFERED=0
+    volumes:
+      - ./sps:/sps
     depends_on:
       - db
     links:

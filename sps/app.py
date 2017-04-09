@@ -18,10 +18,10 @@ async def init_application(loop):
 
     # SECTION: Configuring project
     db_config = utils.conf.get_db_config()
-    print(db_config)
     # saving config
     app['conf'] = {'postgres': db_config}
     app['pool'] = await asyncpgsa.create_pool(**db_config)
+    app.on_cleanup.append(app['pool'].close)
 
     # SECTION: sub-apps
     app['apps'] = {}  # dictionary for apps to store any info at
@@ -38,10 +38,6 @@ def main():
     loop = asyncio.get_event_loop()
 
     app = loop.run_until_complete(init_application(loop))
-    print(
-        os.getenv('SERVER_HOST', '127.0.0.1'),
-        int(os.getenv('SERVER_PORT', 4000))
-    )
     web.run_app(app,
                 host=os.getenv('SERVER_HOST', '127.0.0.1'),
                 port=int(os.getenv('SERVER_PORT', 4000)))
