@@ -9,6 +9,14 @@ from aiohttp_admin.security import DummyAuthPolicy, DummyTokenIdentityPolicy
 from api.db import song, artist
 
 
+__all__ = ('init_admin', )
+
+
+async def init_admin(app, loop):
+    admin = await get_admin_subapp(app, loop)
+    app.add_subapp('/admin', admin)
+
+
 async def get_admin_subapp(app, loop):
     pg = await init_admin_engine(loop, app['conf']['postgres'])
 
@@ -23,10 +31,6 @@ async def get_admin_subapp(app, loop):
     admin = setup_admin(app, pg, admin_config_path)
     return admin
 
-
-
-
-
 async def init_admin_engine(loop, db_conf):
     engine = await aiopg.sa.create_engine(
         loop=loop,
@@ -36,8 +40,6 @@ async def init_admin_engine(loop, db_conf):
         host=db_conf.get('host'),
     )
     return engine
-
-
 
 def generate_ng_admin_config():
     base_url = '/admin'
@@ -52,8 +54,6 @@ def generate_ng_admin_config():
 
     with open(config_path, 'w') as file:
         file.write(config_str)
-
-
 
 def setup_admin(app, pg, admin_config_path):
     resources = (PGResource(pg, artist, url='artist'),

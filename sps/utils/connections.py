@@ -11,7 +11,7 @@ import asyncpgsa
 
 
 
-async def init_redis(app):
+async def init_redis(app, loop):
     # Configuring
     conf = (
         'redis',  # Host
@@ -19,7 +19,7 @@ async def init_redis(app):
     )
 
     # Creating pool
-    redis = await aioredis.create_connection(conf)
+    redis = await aioredis.create_connection(conf, loop=loop)
 
     # Grateful shutdown
     async def close_redis():
@@ -27,18 +27,24 @@ async def init_redis(app):
     app.on_cleanup.append(close_redis)
 
 
-async def init_postgres(app):
+async def init_postgres(app, loop):
     # Configuring
     conf = {
         'user': os.getenv('POSTGRES_USER'),
         'password': os.getenv('POSTGRES_PASSWORD'),
-        'port': os.getenv('POSTGRES_PORT'),
+        'port': os.getenv('POSTGRES_PORT', 5432),
         'database': os.getenv('POSTGRES_DB'),
-        'host': os.getenv('postgres'),
+        'host': 'postgres',  # Hardcoded as docker-linked service
     }
 
     # Creating pool
-    app['pool'] = await asyncpgsa.create_pool(**conf)
+    app['pool'] = await asyncpgsa.create_pool(**conf, loop=loop)
+
+    # Saving config for aiohttp_admin
+    app['conf'] = app.get('conf', {})
+    app['conf'].update({
+        'postgres': conf
+    })
 
     # Grateful shutdown
     app.on_cleanup.append(app['pool'].close)

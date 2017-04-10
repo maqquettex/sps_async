@@ -5,12 +5,15 @@ POSTGRES_DB=sps
 POSTGRES_HOST=docker_db
 
 all:
-	docker-compose up -d db
+	docker-compose up -d
 	@sleep 3
 	docker-compose up --build -d aiohttp
 
 up:
-	docker-compose up
+	docker-compose up -d
+	@sleep 3
+	docker-compose restart aiohttp
+	docker-compose logs -f aiohttp
 
 restart:
 	docker-compose restart aiohttp
@@ -21,7 +24,12 @@ stop:
 conf_dev:
 	cp $(PROJECT_DIR)/configs/dev/docker-compose.yml $(PROJECT_DIR)/docker-compose.yml
 	cp $(PROJECT_DIR)/configs/dev/Dockerfile $(PROJECT_DIR)/Dockerfile
-	cp $(PROJECT_DIR)/configs/dev/postgres.env $(PROJECT_DIR)/postgres.env
+	cp $(PROJECT_DIR)/configs/dev/environment $(PROJECT_DIR)/environment
+
+link_dev:
+	ln $(PROJECT_DIR)/configs/dev/docker-compose.yml $(PROJECT_DIR)/docker-compose.yml
+	ln $(PROJECT_DIR)/configs/dev/Dockerfile $(PROJECT_DIR)/Dockerfile
+	ln $(PROJECT_DIR)/configs/dev/environment $(PROJECT_DIR)/environment
 
 conf_prod:
 	cp $(PROJECT_DIR)/configs/prod/docker-compose.yml $(PROJECT_DIR)/docker-compose.yml

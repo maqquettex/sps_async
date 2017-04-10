@@ -1,26 +1,26 @@
 version: "3"
 
 services:
-  db:
+  redis:
+    image: redis:latest
+
+  postgres:
     image: postgres:9.3
     env_file:
-      - postgres.env
+      - environment
     volumes:
       - ./db_data:/docker-entrypoint-initdb.d
 
   aiohttp:
     build: .
     env_file:
-      - postgres.env
+      - environment
     environment:
-      - SERVER_HOST=0.0.0.0
-      - SERVER_PORT=4000
       - PYTHONUNBUFFERED=0
     volumes:
       - ./sps:/sps
     depends_on:
-      - db
-    links:
-      - db:docker_db
+      - postgres
+      - redis
     ports:
       - "4000:4000"
