@@ -1,3 +1,3 @@
 from .middlewares import *
-from .conf import *
-from .views import *
+from .admin import *
+from .connections import *

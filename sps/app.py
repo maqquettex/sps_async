@@ -1,36 +1,36 @@
 import os
 import asyncio
+import aioredis
 import asyncpgsa
 from aiohttp import web
 
 import api
-import utils
-from utils import admin as admin_utils
+from utils.middlewares import *
+import utils.admin
+import utils.jinja
+import utils.connections
 
 
 async def init_application(loop):
-    # SECTION: Creating Application instance, basic init configuration
+
     middlewares = [
         # List of middlewares is here
-        utils.middlewares.trailing_slash_redirect_middleware,
+        trailing_slash_redirect_middleware,
     ]
     app = web.Application(loop=loop, middlewares=middlewares)
 
-    # SECTION: Configuring project
-    db_config = utils.conf.get_db_config()
-    # saving config
-    app['conf'] = {'postgres': db_config}
-    app['pool'] = await asyncpgsa.create_pool(**db_config)
-    app.on_cleanup.append(app['pool'].close)
+
+    await utils.connections.init_postgres(app, loop)
+    await utils.connections.init_redis(app, loop)
+
+    await utils.admin.init_admin(app, loop)
 
     # SECTION: sub-apps
     app['apps'] = {}  # dictionary for apps to store any info at
     # Registering apps
     api.register_in_app(app, prefix='api')
 
-    utils.setup_jinja2(app, __file__)
-    admin = await admin_utils.get_admin_subapp(app, loop)
-    app.add_subapp('/admin', admin)
+    utils.jinja.setup_jinja2(app, __file__)
 
     return app
 

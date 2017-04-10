@@ -4,7 +4,7 @@ services:
   db:
     image: postgres:9.3
     env_file:
-      - ./configs/postgres.env
+      - environment
     volumes:
       - ./dbdata:/var/lib/postgresql/data
 
@@ -12,7 +12,7 @@ services:
   aiohttp:
     build: .
     env_file:
-      - ./configs/postgres.env
+      - environment
     depends_on:
       - db
     links:
