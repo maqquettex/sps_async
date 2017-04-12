@@ -13,6 +13,7 @@ __all__ = ('init_admin', )
 
 
 async def init_admin(app, loop):
+    print('hello')
     admin = await get_admin_subapp(app, loop)
     app.add_subapp('/admin', admin)
 
@@ -41,19 +42,6 @@ async def init_admin_engine(loop, db_conf):
     )
     return engine
 
-def generate_ng_admin_config():
-    base_url = '/admin'
-
-    entities = [
-        ('artist', 'id', artist),
-        ('song', 'id', song),
-    ]
-
-    config_str = generate_config(entities, base_url)
-    config_path = str(aiohttp_admin.PROJ_ROOT / 'static' / 'js' / 'new_config.js')
-
-    with open(config_path, 'w') as file:
-        file.write(config_str)
 
 def setup_admin(app, pg, admin_config_path):
     resources = (PGResource(pg, artist, url='artist'),
@@ -67,3 +55,17 @@ def setup_admin(app, pg, admin_config_path):
     return admin
 
 
+def generate_ng_admin_config():
+    base_url = '/admin'
+
+    entities = [
+        ('artist', 'id', artist),
+        ('song', 'id', song),
+    ]
+
+    config_str = generate_config(entities, base_url)
+    config_path = str(aiohttp_admin.PROJ_ROOT / 'static' / 'js' / 'new_ng_config.js')
+    print('New config saved at {}'.format(config_path))
+
+    with open(config_path, 'w') as file:
+        file.write(config_str)

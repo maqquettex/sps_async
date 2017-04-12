@@ -23,7 +23,6 @@ async def init_application(loop):
     await utils.connections.init_postgres(app, loop)
     await utils.connections.init_redis(app, loop)
 
-    await utils.admin.init_admin(app, loop)
 
     # SECTION: sub-apps
     app['apps'] = {}  # dictionary for apps to store any info at
@@ -32,6 +31,9 @@ async def init_application(loop):
 
     utils.jinja.setup_jinja2(app, __file__)
 
+    # Admin should be inited only after all sub-apps are connected
+
+    await utils.admin.init_admin(app, loop)
     return app
 
 def main():
