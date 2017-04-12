@@ -1,19 +1,31 @@
 version: "3"
 
 services:
-  db:
+  redis:
+    restart: always
+    image: redis:latest
+
+  nginx:
+    restart: always
+    build: ./configs/prod/nginx/
+    ports:
+      - "80:80"
+    depends_on:
+      - aiohttp
+
+  postgres:
+    restart: always
     image: postgres:9.3
     env_file:
       - environment
-    volumes:
-      - ./dbdata:/var/lib/postgresql/data
-
 
   aiohttp:
-    build: .
+    restart: always
+    build: ./configs/prod/aiohttp/
     env_file:
       - environment
+    environment:
+      - PYTHONUNBUFFERED=0
     depends_on:
-      - db
-    links:
-      - db:docker_db
+      - postgres
+      - redis

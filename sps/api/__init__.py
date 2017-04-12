@@ -1,6 +1,3 @@
-import jinja2
-import aiohttp_jinja2
-
 from .routes import setup_routes
 from .db import create_tables_sql, artist, song
 
@@ -12,16 +9,6 @@ def register_in_app(app, prefix=None):
         'api': {}
     })
 
-    if 'admin' in app['apps']:
-        app.admin.register_table(song,
-                                 key_field='id',
-                                 list_fields=['id', 'title', 'artist_id'])
-        app.admin.register_table(artist,
-                                 key_field='id',
-                                 list_fields=['id', 'name'])
-
     setup_routes(app, prefix)
-    aiohttp_jinja2.setup(
-        app, loader=jinja2.PackageLoader('api', 'templates')
-    )
+
     app.on_startup.append(db.create_tables_sql)
