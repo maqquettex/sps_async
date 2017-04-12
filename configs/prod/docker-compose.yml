@@ -21,7 +21,7 @@ services:
 
   aiohttp:
     restart: always
-    build: ./configs/prod/aiohttp/
+    build: ./sps/
     env_file:
       - environment
     environment:
