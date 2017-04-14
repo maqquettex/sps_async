@@ -1,7 +1,9 @@
 FROM python:3.6
 
-ADD requirements.txt requirements.txt
-RUN pip install -r requirements.txt
+RUN mkdir /project
+
+ADD requirements.txt /project/requirements.txt
+RUN pip install -r /project/requirements.txt
 
 ADD . /project
 

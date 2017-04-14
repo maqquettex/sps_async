@@ -56,6 +56,7 @@ def setup_admin(app, pg, admin_config_path):
 
 
 def generate_ng_admin_config():
+    print('Generate admin config')
     base_url = '/admin'
 
     entities = [
@@ -69,3 +70,4 @@ def generate_ng_admin_config():
 
     with open(config_path, 'w') as file:
         file.write(config_str)
+    print('Configuration successfully created, exiting ')
