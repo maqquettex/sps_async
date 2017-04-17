@@ -1,6 +1,7 @@
 version: "3"
 
 services:
+
   redis:
     restart: always
     image: redis:latest
@@ -17,15 +18,16 @@ services:
     restart: always
     image: postgres:9.3
     env_file:
-      - environment
-
+      - ./configs/prod/environment
   aiohttp:
     restart: always
-    build: ./configs/prod/aiohttp/
+    build: ./sps/
     env_file:
-      - environment
+      - ./configs/prod/environment
     environment:
       - PYTHONUNBUFFERED=0
     depends_on:
       - postgres
       - redis
+    ports:
+      - "4000:4000"

@@ -7,18 +7,18 @@ services:
   postgres:
     image: postgres:9.3
     env_file:
-      - environment
+      - ./configs/dev/environment
     volumes:
       - ./db_data:/docker-entrypoint-initdb.d
 
   aiohttp:
-    build: .
+    build: ./sps
     env_file:
-      - environment
+      - ./configs/dev/environment
     environment:
       - PYTHONUNBUFFERED=0
     volumes:
-      - ./sps:/sps
+      - ./sps:/project
     depends_on:
       - postgres
       - redis
