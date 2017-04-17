@@ -15,7 +15,8 @@ log:
 	docker-compose logs -f aiohttp
 
 restart:
-	docker-compose restart aiohttp
+	docker-compose kill aiohttp
+	docker-compose up -d aiohttp
 	docker-compose logs -f aiohttp
 
 up:

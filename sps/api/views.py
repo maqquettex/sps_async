@@ -1,6 +1,12 @@
+import json
 from aiohttp import web
 
 from . import db
+
+
+def own_dumps(*args, **kwargs):
+    kwargs['ensure_ascii'] = False
+    return json.dumps(*args, **kwargs)
 
 
 class SongsApiView:
@@ -18,13 +24,24 @@ class SongsApiView:
 
     @staticmethod
     async def list(request):
-        artist = request.rel_url.query.get('artist', '')
-        artist = int(artist) if artist.isdigit() else None
-        notext = True if 'notext' in request.rel_url.query else None
-        artist_to_text = True if 'withnames' in request.rel_url.query else None
+        artist = request.query.get('artist', '')
 
-        songs = await db.get_songs(request.app['pool'], artist, artist_to_text, notext)
-        return web.json_response(songs)
+        if artist.isdigit():
+            artist_id = int(artist)
+            artist_to_text=False
+        elif artist == 'name':
+            artist_id = None
+            artist_to_text = True
+        else:
+            artist_id = None
+            artist_to_text = False
+
+        notext = True if 'exclude' == request.query.get('text') else None
+        songs = await db.get_songs(request.app['pool'],
+                                   artist_id=artist_id,
+                                   artists_to_text=artist_to_text,
+                                   notext=notext)
+        return web.json_response(songs, dumps=own_dumps)
 
     @staticmethod
     async def retrieve(request):
@@ -34,12 +51,14 @@ class SongsApiView:
         else:
             return web.HTTPNotFound()
 
-        artist_to_text = True if 'withnames' in request.rel_url.query else None
+        artist_to_text = True if 'name' == request.query.get('artist') else None
         result = await db.get_single_song(request.app['pool'], song_id, artist_to_text)
         if result is None:
             return web.HTTPNotFound()
         else:
-            return web.json_response(result)
+            if request.query.get('text') == 'exclude':
+                result.pop('text')
+            return web.json_response(result, dumps=own_dumps)
 
 
 class ArtistsApiView:
@@ -58,7 +77,7 @@ class ArtistsApiView:
     @staticmethod
     async def list(request):
         artists = await db.get_artists(request.app['pool'])
-        return web.json_response(artists)
+        return web.json_response(artists, dumps=own_dumps)
 
     @staticmethod
     async def retrieve(request):
@@ -83,4 +102,4 @@ class ArtistsApiView:
         if artist is None:
             return web.HTTPNotFound()
         else:
-            return web.json_response(artist)
+            return web.json_response(artist, dumps=own_dumps)

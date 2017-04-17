@@ -13,7 +13,6 @@ __all__ = ('init_admin', )
 
 
 async def init_admin(app, loop):
-    print('hello')
     admin = await get_admin_subapp(app, loop)
     app.add_subapp('/admin', admin)
 
