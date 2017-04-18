@@ -1,8 +1,12 @@
 import json
+from datetime import datetime
 from aiohttp import web
-from aioredis import create_connection
+
 
 from . import db
+
+
+DATETIME_FORMAT = "%Y-%m-%dT%H-%M-%S"
 
 
 def own_dumps(*args, **kwargs):
@@ -24,6 +28,12 @@ async def create_party(request):
     request.app['apps']['parties'].update({
         request.match_info['password']: []
     })
+
+    redis = request.app['redis']
+    party_key = 'party:{}'.format(request.match_info['password'])
+
+    await redis.set(party_key+':expire', datetime.now().strftime(DATETIME_FORMAT))
+    await redis.set(party_key+':current', 0)
 
     return web.json_response(
         {'token': tokens['master_token']},
@@ -58,17 +68,49 @@ async def websocket_handler(request):
 
     redis = request.app['redis']
     party_key = 'party:{}'.format(token_info['password'])
+
     party_waiters = request.app['apps']['parties'][token_info['password']]
     party_waiters.append(ws)
 
+    init_data = {
+        'current': int(await redis.get(party_key + ':current')),
+        'proposed': [int(id) for id in
+                     await redis.smembers(party_key + ':proposed')],
+    }
+    ws.send_str(json.dumps(init_data))
+
     try:
         async for msg in ws:
+            await redis.set(party_key + ':expire', datetime.now().strftime(DATETIME_FORMAT))
+
             if msg.tp == web.MsgType.text:
-                print(msg.data, 'got from websocket')
-
-
+                data = json.loads(msg.data)
                 for waiter in party_waiters:
-                    waiter.send_str(msg.data)
+                    waiter.send_str('got data:' + msg.data)
+
+                if not token_info['master']:
+                    await redis.sadd(party_key + ':proposed', data['song'])
+                    for waiter in party_waiters:
+                        waiter.send_str(json.dumps({
+                            'action': 'propose',
+                            'song': data['song'],
+                        }))
+                elif 'action' in data:
+                    if data['action'] == 'ignore' or data['action'] == 'choose':
+                        resp_json = ({
+                            'action': data['action'],
+                            'song': data['song']
+                        })
+                        await redis.srem(party_key + ':proposed', data['song'])
+
+                        if data['action'] == 'choose':
+                            await redis.set(party_key + ':current', data['song'])
+
+                        for waiter in party_waiters:
+                            waiter.send_str(json.dumps(resp_json))
+                    elif data['action'] == 'delete':
+                        for waiter in party_waiters:
+                            await waiter.close()
 
             elif msg.tp == web.MsgType.error:
                 print('connection closed with exception {}'.format(ws.exception()))
