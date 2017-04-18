@@ -1,10 +1,9 @@
 import os
 import asyncio
-import aioredis
-import asyncpgsa
 from aiohttp import web
 
 import api
+import parties
 from utils.middlewares import *
 import utils.admin
 import utils.jinja
@@ -16,6 +15,7 @@ async def init_application(loop):
     middlewares = [
         # List of middlewares is here
         trailing_slash_redirect_middleware,
+        cors_headers_middleware,
     ]
     app = web.Application(loop=loop, middlewares=middlewares)
 
@@ -28,6 +28,7 @@ async def init_application(loop):
     app['apps'] = {}  # dictionary for apps to store any info at
     # Registering apps
     api.register_in_app(app, prefix='api')
+    parties.register_in_app(app, prefix='party')
 
     utils.jinja.setup_jinja2(app, __file__)
 

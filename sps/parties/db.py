@@ -1,3 +1,5 @@
+from datetime import datetime
+from hashlib import md5
 import sqlalchemy as sa
 from sqlalchemy.schema import CreateTable
 import asyncpg
@@ -21,119 +23,75 @@ party = sa.Table(
     sa.Column('password', sa.String(16), primary_key=True),
     sa.Column('master_token', sa.String(32)),
     sa.Column('user_token', sa.String(32)),
-    sa.Column('name', sa.String(200), nullable=False),
-
 )
 
 
 
 async def create_tables_sql(app):
-    for name, table in meta.tables.items():
-        async with app['pool'].acquire() as conn:
-            try:
-                await conn.execute(CreateTable(table))
-            except asyncpg.exceptions.DuplicateTableError:
-                pass
+    async with app['pool'].acquire() as conn:
+        try:
+            await conn.execute(CreateTable(party))
+        except asyncpg.exceptions.DuplicateTableError:
+            pass
 
 
-async def get_songs(pool, artist_id=None, artists_to_text=None, notext=None):
-
-    query = song.select()
-
-
-    if artist_id:
-        query = query.where(song.c.artist_id == artist_id)
-
-    results = []
-    async with pool.acquire() as conn:
-        for row in await conn.fetch(query):
-            results.append({
-                'artist': row.artist_id,
-                'title': row.title,
-                'id': row.id,
-                'text': row.id,
-            })
-
-    if artists_to_text is True:
-        all_artists = dict()
-        async with pool.transaction() as conn:
-            for row in await conn.fetch(artist.select()):
-                all_artists[row.id] = row.name
-
-        for result in results:
-            result['artist'] = all_artists[result['artist']]
-
-    if notext is True:
-        for result in results:
-            result.pop('text')
-
-    return results
-
-async def get_single_song(pool, song_id, artist_to_text=None):
-    query = song.select().where(song.c.id == song_id)
-    result_song = dict()
-    async with pool.transaction() as conn:
-        song_row = await conn.fetchrow(query)
-
-    if not song_row:
-        return None
-
-    result_song.update({
-        'artist': song_row.artist_id,
-        'title': song_row.title,
-        'id': song_row.id,
-        'text': song_row.text
-    })
-    if result_song == {}:
-        return None
-
-    if artist_to_text:
-        artist_query = artist.select().where(artist.c.id == result_song['artist'])
-        async with pool.transaction() as conn:
-            artist_row = await conn.fetchrow(artist_query)
-
-        result_song['artist'] = artist_row.name
-    return result_song
-
-
-async def get_artists(pool):
-    query = artist.select()
+async def get_party_by_password(pool, password):
+    query = party.select().where(party.c.password == password)
 
     async with pool.transaction() as conn:
-        results = await conn.fetch(query)
+        party_row = await conn.fetchrow(query)
 
-    return [{'id': row.id,
-             'name': row.name,
-             } for row in results]
-
-async def get_single_artist(pool, artist_id, select_songs=None, full_songs=None):
-    query = artist.select().where(artist.c.id == artist_id)
-    async with pool.transaction() as conn:
-        row = await conn.fetchrow(query)
-
-    if not row:
+    if not party_row:
         return None
+    else:
+        return {
+            'user_token': party_row.user_token,
+            'master_token': party_row.master_token,
+        }
 
-    result_artist = {
-        'id': row.id,
-        'name': row.name
+
+async def create_party_by_password(pool, password):
+    creation_time = datetime.now()
+    party_hash = md5(str(creation_time).encode('utf-8')).hexdigest()
+    master_token = party_hash[::2]
+    user_token = party_hash[1::2]
+
+    query = party.insert().values(
+        password=password,
+        master_token=master_token,
+        user_token=user_token,
+    )
+
+    async with pool.transaction() as conn:
+        await conn.fetchrow(query)
+
+    return {
+        'user_token': user_token,
+        'master_token': master_token,
     }
 
-    if select_songs is True:
-        songs = []
-        songs_query = song.select().where(song.c.artist_id == artist_id)
-        async with pool.transaction() as conn:
-            results = await conn.fetch(songs_query)
 
-        for row in results:
-            if full_songs is True:
-                songs.append({
-                    'id': row.id,
-                    'title': row.title,
-                    'text': row.text,
-                })
-            else:
-                songs.append(row.id)
-        result_artist['songs'] = songs
+async def get_party_by_token(pool, token):
+    query = party.select().where(party.c.user_token == token)
 
-    return result_artist
+    async with pool.transaction() as conn:
+        party_row = await conn.fetchrow(query)
+
+    if party_row:
+        return {
+            'password': party_row.password,
+            'master': False
+        }
+
+    query = party.select().where(party.c.master_token == token)
+
+    async with pool.transaction() as conn:
+        party_row = await conn.fetchrow(query)
+
+    if party_row:
+        return {
+            'password': party_row.password,
+            'master': True
+        }
+
+    return None

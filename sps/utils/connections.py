@@ -19,7 +19,8 @@ async def init_redis(app, loop):
     )
 
     # Creating pool
-    redis = await aioredis.create_connection(conf, loop=loop)
+    redis = await aioredis.create_redis(conf, loop=loop)
+    app['redis'] = redis
 
     # Grateful shutdown
     async def close_redis():
