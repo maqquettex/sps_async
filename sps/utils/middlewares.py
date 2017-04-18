@@ -13,3 +13,14 @@ async def trailing_slash_redirect_middleware(app, handler):
             return web.HTTPFound(redirect_url)
         return await handler(request)
     return redirect_handler
+
+
+async def cors_headers_middleware(app, handler):
+    async def redirect_handler(request):
+        response = await handler(request)
+        response.headers["Access-Control-Allow-Origin"] = "*"
+        response.headers["Access-Control-Allow-Methods"] = "POST, GET, OPTIONS"
+        response.headers["Access-Control-Max-Age"] = "1000"
+        response.headers["Access-Control-Allow-Headers"] = "*"
+        return response
+    return redirect_handler
