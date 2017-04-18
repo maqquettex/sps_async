@@ -205,12 +205,16 @@
                         <div class="list-group-item">
                             <input ng-model="searchText" class="form-control " for="searchList">
                         </div>
+                          <div class="list-group-separator"></div>
                         <div class="list-group search-limiter" id="searchList">
-                            <a class="list-group-item" href="#/{{song.id}}" ng-repeat="song in songsInfo | filter:searchText">
+                            <div ng-repeat="song in songsInfo | filter:searchText">
+                            <a class="list-group-item" href="#/{{song.id}}">
                                 <div>
                                     {{song.artist}} - {{song.title}}
                                 </div>
                             </a>
+                              <div class="list-group-separator"></div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -303,7 +307,7 @@
                     </div>
                 </div>
     </footer-->
-    <script src="scripts/main-cb94edb23f.js"></script>
+    <script src="scripts/main-b07696e433.js"></script>
 </body>
 
 </html> 

@@ -2,7 +2,7 @@
 
 angular.module('sps')
     .constant("httpBaseUrl","http://188.226.147.88:80/")
-    .constant("wsBaseUrl","ws://188.226.147.88:80/party")
+    .constant("wsBaseUrl","ws://188.226.147.88:4000/party")
     .factory('songFactory',['$http', 'httpBaseUrl', function($http,httpBaseUrl) {
         var songfac = {};
         var inGroup = false;
