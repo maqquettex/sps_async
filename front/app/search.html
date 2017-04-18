@@ -1,0 +1,14 @@
+<div class="panel panel-default" ng-controller="SearchController">
+    <input ng-model="searchText" class="form-control">
+    <div ng-show="searchText">
+        <a href="#/showsong/{{song.id}}" class="list-group-item" ng-controller="GroupController" ng-repeat="song in songsInfo | filter:searchText">
+            <div class="col-xs-9">
+                <big>{{song.author}} - {{song.title}} </big>
+            </div>
+            <div class="col-xs-3 text-align-right">
+                <button class="{{isProposed(song.id) ? 'btn btn-info pull-right disabled ' : 'btn btn-info pull-right'}}">Propose</button>
+            </div>
+            <div class="clearfix"></div>
+        </a>
+    </div>
+</div>
