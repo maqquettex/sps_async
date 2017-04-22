@@ -13,6 +13,8 @@ services:
       - "80:80"
     depends_on:
       - aiohttp
+    volumes:
+      - ./front/dist:/static
 
   postgres:
     restart: always
