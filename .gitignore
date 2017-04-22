@@ -101,3 +101,9 @@ dbdata
 /docker-compose.yml
 /Dockerfile
 /environment
+
+
+
+# front
+front/node_modules
+front/bower_components
