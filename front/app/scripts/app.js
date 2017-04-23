@@ -6,7 +6,7 @@ angular.module('sps', ['ngRoute', 'ngWebSocket'])
   $httpProvider.defaults.headers.put = {};
   $httpProvider.defaults.headers.patch = {};
 })
-.config(function($routeProvider) {
+.config(function($routeProvider, $locationProvider) {
         $routeProvider
             .when('/', {
                 templateUrl : 'nosong.html',
@@ -25,6 +25,7 @@ angular.module('sps', ['ngRoute', 'ngWebSocket'])
                 controller  : 'ShowsongController'
             })
             .otherwise('/');
+            $locationProvider.hashPrefix('');
     });
 
 var hideit = function () {
