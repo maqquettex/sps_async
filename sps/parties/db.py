@@ -1,8 +1,10 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from hashlib import md5
 import sqlalchemy as sa
 from sqlalchemy.schema import CreateTable
 import asyncpg
+
+DATETIME_FORMAT = "%Y-%m-%dT%H-%M-%S"
 
 
 meta = sa.MetaData()
@@ -95,3 +97,42 @@ async def get_party_by_token(pool, token):
         }
 
     return None
+
+async def clean_expired(redis, pg):
+    print(1)
+    expired = []
+
+    query = party.select()
+
+    async with pg.acquire() as conn:
+        for row in await conn.fetch(query):
+            password = row.password
+            update_key = 'party:{}:updated'.format(password)
+
+            update = await redis.get(update_key)
+            if update is None:
+                continue
+
+            try:
+                update_date = datetime.strptime(update, DATETIME_FORMAT)
+            except:
+                continue
+
+            if update_date + timedelta(hours=1) < datetime.now():
+                expired.append(password)
+
+    query = party.delete().where(party.c.password.in_(expired))
+
+    async with pg.transaction() as conn:
+        await conn.fetchrow(query)
+
+    for password in expired:
+        await redis.delete('party:{}:update'.format(password))
+        await redis.delete('party:{}:current'.format(password))
+        await redis.delete('party:{}:proposed'.format(password))
+
+
+
+
+
+

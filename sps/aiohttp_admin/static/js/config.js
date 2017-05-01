@@ -46,10 +46,12 @@
 
         var artist = nga.entity('artist').identifier(nga.field('id'));
         var song = nga.entity('song').identifier(nga.field('id'));
+        var party = nga.entity('party').identifier(nga.field('password'));
         
 
         admin.addEntity(artist);
         admin.addEntity(song);
+        admin.addEntity(party);
         
             
 artist.listView()
@@ -160,7 +162,7 @@ song.showView()
         nga.field('id', 'number'),
         nga.field('artist_id', 'number'),
         nga.field('title', 'string'),
-        nga.field('text', 'text'),
+        nga.field('text', 'text')
         
     ]);
 
@@ -168,7 +170,56 @@ song.showView()
 song.deletionView()
     .title('Deletion confirmation for entity song');
 
-        nga.configure(admin);
+party.listView()
+     .title('List entity party')
+     .description('List of party')
+     .perPage(50)
+     .fields([
+         nga.field('password', 'string').isDetailLink(true),
+         nga.field('master_token', 'string').isDetailLink(true),
+         nga.field('user_token', 'string').isDetailLink(true)
+    ])
+    .sortField('password')
+    .listActions(['show', 'edit', 'delete']);
+
+
+party.creationView()
+     .title('Create entity party')
+     .fields([
+         nga.field('password', 'string'),
+         nga.field('master_token', 'string'),
+         nga.field('user_token', 'string')
+
+    ]);
+party.creationView()
+     .onSubmitError(['error', 'form', 'progression', 'notification', onSubmitError]);
+
+
+party.editionView()
+     .title('Edit entity party')
+     .fields([
+         nga.field('password', 'string').editable(false),
+         nga.field('master_token', 'string'),
+         nga.field('user_token', 'string')
+
+    ]);
+party.editionView()
+     .onSubmitError(['error', 'form', 'progression', 'notification', onSubmitError]);
+
+
+party.showView()
+     .title('Show entity party')
+     .fields([
+         nga.field('password', 'string'),
+         nga.field('master_token', 'string'),
+         nga.field('user_token', 'string')
+    ]);
+
+
+party.deletionView()
+    .title('Deletion confirmation for entity party');
+
+nga.configure(admin);
     }]);
 
 }());

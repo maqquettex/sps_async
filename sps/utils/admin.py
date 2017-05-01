@@ -7,6 +7,7 @@ from aiohttp_admin.security import DummyAuthPolicy, DummyTokenIdentityPolicy
 
 
 from api.db import song, artist
+from parties.db import party
 
 
 __all__ = ('init_admin', )
@@ -44,7 +45,8 @@ async def init_admin_engine(loop, db_conf):
 
 def setup_admin(app, pg, admin_config_path):
     resources = (PGResource(pg, artist, url='artist'),
-                 PGResource(pg, song, url='song'))
+                 PGResource(pg, song, url='song'),
+                 PGResource(pg, party, url='party', primary_key='password'))
     admin = aiohttp_admin.setup(app, admin_config_path, resources=resources)
 
     # setup dummy auth and identity
@@ -61,6 +63,7 @@ def generate_ng_admin_config():
     entities = [
         ('artist', 'id', artist),
         ('song', 'id', song),
+        ('party', 'password', party)
     ]
 
     config_str = generate_config(entities, base_url)
