@@ -73,6 +73,7 @@ async def websocket_handler(request):
     party_waiters.append(ws)
 
     init_data = {
+        'master': token_info['master'],
         'current': int(await redis.get(party_key + ':current')),
         'proposed': [int(id) for id in
                      await redis.smembers(party_key + ':proposed')],
@@ -85,8 +86,6 @@ async def websocket_handler(request):
 
             if msg.tp == web.MsgType.text:
                 data = json.loads(msg.data)
-                for waiter in party_waiters:
-                    waiter.send_str('got data:' + msg.data)
 
                 if not token_info['master']:
                     await redis.sadd(party_key + ':proposed', data['song'])

@@ -8,7 +8,7 @@ services:
 
   nginx:
     restart: always
-    build: ./configs/prod/nginx/
+    build: ./nginx/
     ports:
       - "80:80"
     depends_on:
@@ -21,6 +21,7 @@ services:
     image: postgres:9.3
     env_file:
       - ./configs/prod/environment
+
   aiohttp:
     restart: always
     build: ./sps/

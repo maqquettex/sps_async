@@ -11,6 +11,16 @@ services:
     volumes:
       - ./db_data:/docker-entrypoint-initdb.d
 
+  nginx:
+    restart: always
+    build: ./nginx/
+    ports:
+      - "80:80"
+    depends_on:
+      - aiohttp
+    volumes:
+      - ./front/app:/static
+
   aiohttp:
     build: ./sps
     env_file:
