@@ -1,8 +1,8 @@
 'use strict';
 
 angular.module('sps')
-    .constant("httpBaseUrl","http://188.226.147.88:80/")
-    .constant("wsBaseUrl","ws://188.226.147.88:4000/party")
+    .constant("httpBaseUrl","http://localhost:80/")
+    .constant("wsBaseUrl","ws://localhost:4000/party")
     .factory('songFactory',['$http', 'httpBaseUrl', function($http,httpBaseUrl) {
         var songfac = {};
         var inGroup = false;
@@ -74,9 +74,12 @@ angular.module('sps')
         groupfac.getToken = function() {
             return groupfac.token;
         };
+        groupfac.setToken = function(token) {
+            groupfac.token = token;
+        };
         groupfac.connect = function() {
             return (wsBaseUrl + "/" + groupfac.token);
-        }
+        };
         groupfac.joinGroup = function(password) {
             var got = true;
             var resp = {};
@@ -125,3 +128,7 @@ angular.module('sps')
 
         return groupfac;
     });
+
+
+
+

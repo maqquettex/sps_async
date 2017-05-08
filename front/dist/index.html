@@ -10,6 +10,7 @@
     <!-- The above 3 meta tags *must* come first in the head; any other head 
          content must come *after* these tags -->
     <title>Song Party Service</title>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Roboto:300,400,500,700" type="text/css">
     <link rel="stylesheet" href="styles/main-fc6f9f3bbd.css"/>
     <!--link href="../bower_components/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -26,7 +27,7 @@
       <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
     <![endif]-->
 </head>
-<body onload="hideit()"  ng-controller="GroupController">
+<body ng-controller="GroupController">
     <nav class="navbar navbar-default">
         <div class="container-fluid">
             <div class="navbar-header">
@@ -222,7 +223,7 @@
             <div class="col-xs-12 col-sm-6">
                 <ng-view></ng-view>
             </div>
-            <div class="col-xs-12 col-sm-3" ng-init="init()">
+            <div class="col-xs-12 col-sm-3">
                 <div id="nowInGroup">
                     <div class="well centered-content" id="userPanel">
                         <div class="list-group">
@@ -238,26 +239,66 @@
                         <a class="btn btn-danger btn-md" ng-click="leave()">Leave group</a>`
                     </div>
                     <div id="leaderPanel" class="well">
-                        <span class="list-group-item" ng-repeat="song in proposed track by $index" style="padding: 0">
+                        <!--span class="list-group-item" ng-repeat="song in proposed track by $index" style="padding: 0">
                             <a ng-href="#/{{song.id}}" ng-attr-class="{{(song.id == nowplaying) ? 'list-group-item list-group-item-success proposed-info': 'list-group-item proposed-info'}}" >
-                            <p id="songMenu{{song.id}}" class="list-group-item-heading btn-group btn-group-justified" style="display: none;">
-                                <span class="btn btn-danger" ng-click="deleteProposed(song.id)">Del</span>
-                                <span class="btn btn-success" ng-click="play(song.id)" ng-show="nowplaying != song.id">Play</span>
-                            </p>
-                            <p  id="songDisp{{song.id}}" class="list-group-item-headi1ng">
-                                {{song.artist}} - {{song.title}}
-                            </p>
-                        </a>
-                        <div class="btn btn-warning proposed-button" ng-click="toggleMenu(song.id)">
-                        <h5>M</h5>
-                        </div>
-                        <!-- clicking on this div swaps current view (admin or song title) for this proposed song -->
-                        </span>
-                            <p>
-                                <div class="btn-group btn-group-justified">
-                                    <a class="btn btn-danger" ng-click="delete()">Delete group</a>
-                                </div>
-                            </p>
+                                <p id="songMenu{{song.id}}" class="list-group-item-heading btn-group btn-group-justified" style="display: none;">
+                                    <span class="btn btn-danger" ng-click="deleteProposed(song.id)">Del</span>
+                                    <span class="btn btn-success" ng-click="play(song.id)" ng-show="nowplaying != song.id">Play</span>
+                                </p>
+                                <p  id="songDisp{{song.id}}" class="list-group-item-headi1ng">
+                                    {{song.artist}} - {{song.title}}
+                                </p>
+                            </a>
+                            <div class="btn btn-warning proposed-button" ng-click="toggleMenu(song.id)">
+                            <h5>M</h5>
+                            </div>
+                        </span-->
+                        <table class="table table-striped table-hover">
+                            <tbody>
+                                <tr ng-repeat="song in proposed track by $index"
+                                    ng-attr-class="{{(song.id == nowplaying) ? 'success': ''}}"
+                                    ng-href="#/{{song.id}}">
+                                    <td id="songDisp{{song.id}}" style="vertical-align: middle;">
+                                        {{song.artist}} - {{song.title}}
+                                    </td>
+                                    <td style="display: none;" id="songMenu{{song.id}}" >
+                                        <span class="btn btn-danger btn-xs"
+                                            ng-click="deleteProposed(song.id)">
+                                            <i class="material-icons" style="font-size: 18px;">delete</i>
+                                        </span>
+                                        <span class="btn btn-success btn-xs"
+                                            ng-click="play(song.id)"
+                                            ng-show="nowplaying != song.id">
+                                            <i class="material-icons" style="font-size: 18px;">play arrow</i>
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <div class="btn-group">
+                                            <a href="bootstrap-elements.html"
+                                                data-target="#"
+                                                class="btn dropdown-toggle btn-xs"
+                                                data-toggle="dropdown">  
+                                                <i class="material-icons" style="font-size: 18px;">settings</i>
+                                            </a>
+                                            <ul class="dropdown-menu">
+                                                <li><a ng-click="deleteProposed(song.id)">
+                                                    Delete
+                                                </a></li>
+                                                <li><a ng-click="play(song.id)"
+                                                    ng-show="nowplaying != song.id">
+                                                    Play
+                                                </a></li>
+                                            </ul>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <p>
+                            <div class="btn-group btn-group-justified">
+                                <a class="btn btn-danger" ng-click="delete()">Delete group</a>
+                            </div>
+                        </p>
                     </div>
                 </div>
                 <div id="notInGroup">
@@ -307,7 +348,7 @@
                     </div>
                 </div>
     </footer-->
-    <script src="scripts/main-b07696e433.js"></script>
+    <script src="scripts/main-85d6ba3708.js"></script>
 </body>
 
 </html> 

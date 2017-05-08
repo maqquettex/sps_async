@@ -1,4 +1,5 @@
 'use strict';
+$.material.init();
 angular.module('sps', ['ngRoute', 'ngWebSocket'])
 .config(function ($httpProvider) {
   $httpProvider.defaults.headers.common = {};

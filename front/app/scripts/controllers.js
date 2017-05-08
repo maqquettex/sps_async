@@ -33,6 +33,7 @@ angular.module('sps')
     );
 }])
 .controller('GroupController', ['$scope', 'groupFactory', 'songFactory', '$websocket', '$location', function($scope, groupFactory, songFactory, $websocket, $location) {
+    hideit();
     var newSong = {};
     $scope.addSongArtist = '';
     $scope.addSongTitle = '';
@@ -46,93 +47,7 @@ angular.module('sps')
     $scope.isLeader = false;
     $scope.token = '0';
     $scope.socket = {};
-    $scope.isInGroup = function() {
-        return $scope.inGroup;
-    };
-    $scope.$watch('inGroup', function(newValue, oldValue) { //triggers animation when state changes
-        console.log(oldValue + ' ' + newValue);
-        if (newValue != oldValue && newValue) {
-            songFactory.setInGroup(newValue);
-            $('#notInGroup').hide(200);
-            $('#nowInGroup').show(200);
-            console.log('show');
-            if (!$scope.isLeader) {
-                $('#userPanel').show(200);
-            }
-        } else if (newValue != oldValue && !newValue) {
-            songFactory.setInGroup(newValue);
-            $('#nowInGroup').hide(200);
-            $('#notInGroup').show(200);
-            console.log('hide');
-            if (!$scope.isLeader) {
-                $('#userPanel').hide(200);
-            }
-        }
-    });
-    $scope.$watch('isLeader', function(newValue, oldValue) { // as higher
-        if (newValue != oldValue && newValue) {
-            $('#leaderPanel').show(200);
-        } else if (newValue != oldValue && !newValue) {
-            $('#leaderPanel').hide(200);
-        } 
-    });
-    $scope.nowplaying = 0;
-    $scope.proposed = [];
-    var proposedToggle = [];
-    $scope.joinGroupName = "";
-    $scope.createGroupName = "";
-    $scope.showGroupNameReq = false;
-    $scope.showGroupServerProblem = false;
-    $scope.showGroupNameProblem = false;
-    $scope.createGroup = function() {
-        if ($scope.createGroupName == "") {
-            $scope.showGroupNameReq = true;
-            return;
-        }
-        var res = groupFactory.createGroup($scope.createGroupName);
-        if (res == 1) {
-            $scope.showGroupServerProblem = true;
-            return;
-        }
-        if (res == 2) {
-            $scope.showGroupNameProblem = true;
-            return;
-        }
-        $scope.socketer(groupFactory.connect());
-        console.log($scope.socket);
-        $scope.showGroupNameReq = false;
-        $scope.showGroupServerProblem = false;
-        $scope.showGroupNameProblem = false;
-        $scope.inGroup = true;
-        $scope.isLeader = true;
-        $('#createGroupModal').modal('hide');
-        $('#propButton').show(100);
-        $scope.token = groupFactory.getToken();
-    };
-    $scope.joinGroup = function() {
-        if ($scope.joinGroupName == "") {
-            $scope.showGroupNameReq = true;
-            return;
-        }
-        var res = groupFactory.joinGroup($scope.joinGroupName);
-        if (res == 1) {
-            $scope.showGroupServerProblem = true;
-            return;
-        }
-        if (res == 2) {
-            $scope.showGroupNameProblem = true;
-            return;
-        }
-        $scope.socketer(groupFactory.connect());
-        $scope.showGroupServerProblem = false;
-        $scope.showGroupNameProblem = false;
-        $scope.showGroupNameReq = false;
-        $scope.inGroup = true;
-        console.log($scope.socket);
-        $('#joinGroupModal').modal('hide');
-        $('#propButton').show(100);
-        $scope.token = groupFactory.getToken();
-    };
+
     $scope.socketer = function(link) {
         $scope.socket = new WebSocket(link);
         console.log($scope.socket);
@@ -154,7 +69,7 @@ angular.module('sps')
 
                             $scope.proposed.forEach(function(element, index, array) {
                                 var x = {};
-                                x.id = element;
+                                x.id = element.id;
                                 x.state = false;
                                 proposedToggle.push(x);
                             });
@@ -218,8 +133,11 @@ angular.module('sps')
                 }
             }
             if (jsonmes.action == 'ignore') {
-                if (jsonmes.song == $scope.nowplaying && $scope.isLeader)
+                console.log(jsonmes.song+ " "+ $scope.nowplaying + " " + $scope.isLeader);
+                if (jsonmes.song == $scope.nowplaying && $scope.isLeader) {
+                    console.log("not ignoring");
                     return;
+                }
                 $scope.proposed.forEach(function(element, index, array) {
                     if (element.id === jsonmes.song) {
                         $scope.proposed.splice(index, 1);
@@ -229,8 +147,12 @@ angular.module('sps')
                 });
             }
             if (jsonmes.action == 'choose') {
-                if ($scope.nowplaying == jsonmes.song)
+                console.log(jsonmes.song+ " "+ $scope.nowplaying + " " + $scope.isLeader);
+                if ($scope.nowplaying == jsonmes.song) {
+                    console.log("kekekeke");
                     return;
+                }
+                console.log("choosing");
                 $scope.deleteProposed($scope.nowplaying);
                 console.log($scope.socket);
                 var dup = false;
@@ -269,11 +191,132 @@ angular.module('sps')
             $scope.$apply();
         };
     };
+    $scope.toggleGroupAnim = function(newValue, oldValue) { //triggers animation when state changes
+        console.log(oldValue + ' ' + newValue);
+        if (newValue != oldValue && newValue) {
+            songFactory.setInGroup(newValue);
+            $('#notInGroup').hide(200);
+            $('#nowInGroup').show(200);
+            console.log('show');
+            if (!$scope.isLeader) {
+                $('#userPanel').show(200);
+            }
+            else {
+                console.log("SHOOOW");
+                $('#leaderPanel').show(200);
+            }
+        } else if (newValue != oldValue && !newValue) {
+            songFactory.setInGroup(newValue);
+            $('#nowInGroup').hide(200);
+            $('#notInGroup').show(200);
+            console.log('hide');
+            if (!$scope.isLeader) {
+                $('#userPanel').hide(200);
+            } else {
+                $('#leaderPanel').hide(200);
+            }
+        };
+    };
+    $scope.toggleLeaderAnim = function(newValue, oldValue) { // as higher
+        if (newValue != oldValue && newValue) {
+            $('#leaderPanel').show(200);
+        } else if (newValue != oldValue && !newValue) {
+            $('#leaderPanel').hide(200);
+        } 
+    };
+
+    if (localStorage.token) {
+        console.log(localStorage);
+        $scope.token = localStorage.token;
+        groupFactory.setToken(localStorage.token);
+        $scope.socketer(groupFactory.connect());
+        $scope.isLeader = localStorage.leader == "true";
+        $scope.inGroup = true;
+        $('#nowInGroup').show();
+        $('#notInGroup').hide();
+        $('#leaderPanel').hide();
+        $('#userPanel').hide();
+        if ($scope.isLeader)
+            $('#leaderPanel').show();
+        else
+            $('#userPanel').show();
+    }
+    $scope.isInGroup = function() {
+        return $scope.inGroup;
+    };
+    $scope.$watch('inGroup', $scope.toggleGroupAnim);
+    $scope.$watch('isLeader', $scope.toggleLeaderAnim);
+    $scope.nowplaying = 0;
+    $scope.proposed = [];
+    var proposedToggle = [];
+    $scope.joinGroupName = "";
+    $scope.createGroupName = "";
+    $scope.showGroupNameReq = false;
+    $scope.showGroupServerProblem = false;
+    $scope.showGroupNameProblem = false;
+    $scope.createGroup = function() {
+        if ($scope.createGroupName == "") {
+            $scope.showGroupNameReq = true;
+            return;
+        }
+        var res = groupFactory.createGroup($scope.createGroupName);
+        if (res == 1) {
+            $scope.showGroupServerProblem = true;
+            return;
+        }
+        if (res == 2) {
+            $scope.showGroupNameProblem = true;
+            return;
+        }
+        $scope.socketer(groupFactory.connect());
+        console.log($scope.socket);
+        $scope.showGroupNameReq = false;
+        $scope.showGroupServerProblem = false;
+        $scope.showGroupNameProblem = false;
+        $scope.inGroup = true;
+        $scope.isLeader = true;
+        $('#createGroupModal').modal('hide');
+        $('#propButton').show(100);
+        $scope.token = groupFactory.getToken();
+        localStorage.token = $scope.token;
+        localStorage.leader = $scope.isLeader;
+        localStorage.token_time = (new Date()).toString();
+    };
+    $scope.joinGroup = function() {
+        if ($scope.joinGroupName == "") {
+            $scope.showGroupNameReq = true;
+            return;
+        }
+        var res = groupFactory.joinGroup($scope.joinGroupName);
+        if (res == 1) {
+            $scope.showGroupServerProblem = true;
+            return;
+        }
+        if (res == 2) {
+            $scope.showGroupNameProblem = true;
+            return;
+        }
+        $scope.socketer(groupFactory.connect());
+        $scope.showGroupServerProblem = false;
+        $scope.showGroupNameProblem = false;
+        $scope.showGroupNameReq = false;
+        $scope.inGroup = true;
+        console.log($scope.socket);
+        $('#joinGroupModal').modal('hide');
+        $('#propButton').show(100);
+        $scope.token = groupFactory.getToken();
+        localStorage.token = $scope.token;
+        localStorage.leader = $scope.isLeader;
+        localStorage.token_time = (new Date()).toString();
+    };
     $scope.toggleMenu = function(id) {
         var state = false;
         proposedToggle.forEach(function(element, index, array) {
+            console.log(element);
             if (element.id === id) {
+                console.log(array[index].state);
                 array[index].state = !array[index].state;
+                console.log(array[index].state);
                 state = array[index].state;
             }
         });
@@ -323,9 +366,10 @@ angular.module('sps')
                 isProposed = true;
             }
         }
-        if (isProposed = false) {
+        if (isProposed == false) {
             songFactory.getSongInfo(id).then(
                 function(response) {
+                    console.log(response);
                     var song = {};
                     song = response.data;
                     $scope.proposed.push(song);
@@ -334,6 +378,7 @@ angular.module('sps')
                     x.id = id;
                     x.state = false;
                     proposedToggle.push(x);
+                    $scope
                 },
                 function(response) {
                     var song = {};
@@ -349,7 +394,7 @@ angular.module('sps')
         $scope.socket.send(JSON.stringify(senddata));
     };
     $scope.leave = function() {
-
+        delete localStorage.token;
         proposedToggle = [];
         $scope.proposed = [];
         $scope.nowplaying = 0;
@@ -362,6 +407,7 @@ angular.module('sps')
         $scope.socket.close();
     }
     $scope.delete = function() {
+        delete localStorage.token;
         $('#propButton').hide(100);
         proposedToggle = [];
         $scope.proposed = [];
