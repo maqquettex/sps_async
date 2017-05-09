@@ -4,6 +4,16 @@ services:
   redis:
     image: redis:latest
 
+  elastic:
+    build: ./elastic/
+    volumes:
+      - ./elastic/config/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    environment:
+      ES_JAVA_OPTS: "-Xmx256m -Xms256m"
+
   postgres:
     image: postgres:9.3
     env_file:

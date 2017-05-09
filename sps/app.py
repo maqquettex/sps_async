@@ -16,6 +16,7 @@ async def init_application(loop):
         # List of middlewares is here
         cors_headers_middleware,
         trailing_slash_redirect_middleware,
+        elastic_index_middleware,
     ]
     app = web.Application(loop=loop, middlewares=middlewares)
 

@@ -1,5 +1,5 @@
 from aiohttp import web
-
+from .elastic import update_indexes
 
 async def trailing_slash_redirect_middleware(app, handler):
     async def redirect_handler(request):
@@ -23,4 +23,13 @@ async def cors_headers_middleware(app, handler):
         response.headers["Access-Control-Max-Age"] = "1000"
         response.headers["Access-Control-Allow-Headers"] = "*"
         return response
+    return redirect_handler
+
+
+async def elastic_index_middleware(app, handler):
+    async def redirect_handler(request):
+        if request.method == 'PUT' or request.method == 'POST':
+            if request.path.startswith('/admin'):
+                update_indexes()
+        return await handler(request)
     return redirect_handler
