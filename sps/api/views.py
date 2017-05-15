@@ -137,7 +137,7 @@ async def search_api_view(request):
     print(result_ids)
 
 
-    query = db.song.select().where(db.song.c.artist_id.in_(result_ids))
+    query = db.song.select().where(db.song.c.id.in_(result_ids))
 
     pool = request.app['pool']
     results = []
@@ -147,8 +147,15 @@ async def search_api_view(request):
                 'artist': row.artist_id,
                 'title': row.title,
                 'id': row.id,
-                'text': row.text,
             })
+
+    all_artists = dict()
+    async with pool.transaction() as conn:
+        for row in await conn.fetch(db.artist.select()):
+            all_artists[row.id] = row.name
+
+    for result in results:
+        result['artist'] = all_artists[result['artist']]
 
     print(results)
 
