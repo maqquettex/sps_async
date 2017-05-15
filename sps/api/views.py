@@ -177,4 +177,4 @@ async def search_api_view(request):
         })
 
 
-    return web.json_response(results, dumps=own_dumps)
+    return web.json_response(response_json, dumps=own_dumps)
