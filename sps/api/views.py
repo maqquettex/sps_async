@@ -160,16 +160,14 @@ async def search_api_view(request):
 
     response_json = {
         "pages": {},
-        "results": {}
+        "results": results
     }
     max_pages = int(math.ceil(len(results)//10))
-    if page == 1:
+    if page == 1 or page > max_pages:
         response_json['pages'].update({
             'current': 1,
             'max': max_pages
         })
-    elif page > max_pages:
-        return web.HTTPNotFound()
     else:
         response_json['pages'].update({
             'current': page,
