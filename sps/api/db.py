@@ -46,7 +46,7 @@ async def get_songs(pool, artist_id=None, artists_to_text=None, notext=None):
                 'artist': row.artist_id,
                 'title': row.title,
                 'id': row.id,
-                'text': row.id,
+                'text': row.text,
             })
 
     if artists_to_text is True:

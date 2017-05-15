@@ -20,10 +20,9 @@ async def init_application(loop):
     ]
     app = web.Application(loop=loop, middlewares=middlewares)
 
-
     await utils.connections.init_postgres(app, loop)
     await utils.connections.init_redis(app, loop)
-
+    await utils.connections.init_elasticsearch(app, loop)
 
     # SECTION: sub-apps
     app['apps'] = {}  # dictionary for apps to store any info at

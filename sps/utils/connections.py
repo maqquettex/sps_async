@@ -8,7 +8,7 @@ Functions defined here should take care of:
 import os
 import aioredis
 import asyncpgsa
-
+from aioes import Elasticsearch
 
 
 async def init_redis(app, loop):
@@ -49,3 +49,8 @@ async def init_postgres(app, loop):
 
     # Grateful shutdown
     app.on_cleanup.append(app['pool'].close)
+
+
+async def init_elasticsearch(app, loop):
+    # Creating pool
+    app['elastic'] = Elasticsearch(['elastic:9200'], loop=loop)

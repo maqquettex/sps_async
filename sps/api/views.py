@@ -1,7 +1,9 @@
 import json
+import math
 from aiohttp import web
 
 from . import db
+from . import elastic
 
 
 def own_dumps(*args, **kwargs):
@@ -67,7 +69,7 @@ class ArtistsApiView:
 
     @staticmethod
     def add_routes(app, prefix=None):
-        base_url = SongsApiView.base_url
+        base_url = ArtistsApiView.base_url
         if prefix:
             base_url = '/' + prefix + base_url
 
@@ -103,3 +105,76 @@ class ArtistsApiView:
             return web.HTTPNotFound()
         else:
             return web.json_response(artist, dumps=own_dumps)
+
+
+
+async def search_api_view(request):
+    es = request.app['elastic']
+
+    query = request.query.get('q', '')
+
+    result_ids = []
+    by_param = request.query.get('by', '').strip()
+
+    if by_param == 'artist':
+        result_ids.extend(await elastic.get_by_artist(es, query))
+    if by_param == 'title':
+        result_ids.extend(await elastic.get_by_title(es, query))
+    else:
+        result_ids.extend(await elastic.get_by_title(es, query))
+        result_ids.extend(await elastic.get_by_artist(es, query))
+
+    print(result_ids)
+    flattened = {}
+    for res in result_ids:
+        r_value = flattened.get(res[0], 0)
+        flattened[res[0]] = r_value + res[1]
+
+    result_ids = list(flattened.items())
+    print(result_ids)
+    result_ids.sort(key=lambda item: item[1])
+    result_ids = [int(res[0]) for res in result_ids]
+    print(result_ids)
+
+
+    query = db.song.select().where(db.song.c.artist_id.in_(result_ids))
+
+    pool = request.app['pool']
+    results = []
+    async with pool.acquire() as conn:
+        for row in await conn.fetch(query):
+            results.append({
+                'artist': row.artist_id,
+                'title': row.title,
+                'id': row.id,
+                'text': row.text,
+            })
+
+    print(results)
+
+    page_param = request.query.get('page')
+    if page_param and page_param.isdigit() and int(page_param) > 0:
+        page = int(page_param)
+    else:
+        page = 1
+
+    response_json = {
+        "pages": {},
+        "results": {}
+    }
+    max_pages = int(math.ceil(len(results)//10))
+    if page == 1:
+        response_json['pages'].update({
+            'current': 1,
+            'max': max_pages
+        })
+    elif page > max_pages:
+        return web.HTTPNotFound()
+    else:
+        response_json['pages'].update({
+            'current': page,
+            'max': max_pages
+        })
+
+
+    return web.json_response(results, dumps=own_dumps)

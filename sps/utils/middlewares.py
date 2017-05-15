@@ -27,9 +27,13 @@ async def cors_headers_middleware(app, handler):
 
 
 async def elastic_index_middleware(app, handler):
-    async def redirect_handler(request):
+    async def elastic_index_handler(request):
         if request.method == 'PUT' or request.method == 'POST':
             if request.path.startswith('/admin'):
-                update_indexes()
+                # I think this one should be implemented better
+                # In matter of urgency, doing it with the silly way
+                await update_indexes(
+                    es=app['elastic'], pg=app['pool']
+                )
         return await handler(request)
-    return redirect_handler
+    return elastic_index_handler

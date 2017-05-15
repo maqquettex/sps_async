@@ -20,6 +20,8 @@ services:
       - ./configs/dev/environment
     volumes:
       - ./db_data:/docker-entrypoint-initdb.d
+    depends_on:
+      - elastic
 
   nginx:
     restart: always
@@ -42,5 +44,6 @@ services:
     depends_on:
       - postgres
       - redis
+      - elastic
     ports:
       - "4000:4000"
