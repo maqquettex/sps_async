@@ -132,3 +132,26 @@ async def get_single_artist(pool, artist_id, select_songs=None, full_songs=None)
         result_artist['songs'] = songs
 
     return result_artist
+
+
+async def get_songs_by_ids(pool, ids):
+    query = song.select().where(song.c.id.in_(ids))
+
+    results = []
+    async with pool.acquire() as conn:
+        for row in await conn.fetch(query):
+            results.append({
+                'artist': row.artist_id,
+                'title': row.title,
+                'id': row.id,
+            })
+
+    all_artists = dict()
+    async with pool.transaction() as conn:
+        for row in await conn.fetch(artist.select()):
+            all_artists[row.id] = row.name
+
+    for result in results:
+        result['artist'] = all_artists[result['artist']]
+
+    return results

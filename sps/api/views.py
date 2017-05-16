@@ -124,40 +124,20 @@ async def search_api_view(request):
         result_ids.extend(await elastic.get_by_title(es, query))
         result_ids.extend(await elastic.get_by_artist(es, query))
 
-    print(result_ids)
-    flattened = {}
-    for res in result_ids:
-        r_value = flattened.get(res[0], 0)
-        flattened[res[0]] = r_value + res[1]
 
-    result_ids = list(flattened.items())
-    print(result_ids)
-    result_ids.sort(key=lambda item: item[1])
-    result_ids = [int(res[0]) for res in result_ids]
-    print(result_ids)
+    if result_ids:
+        flattened = {}
+        for res in result_ids:
+            r_value = flattened.get(res[0], 0)
+            flattened[res[0]] = r_value + res[1]
 
+        result_ids = list(flattened.items())
 
-    query = db.song.select().where(db.song.c.id.in_(result_ids))
-
-    pool = request.app['pool']
-    results = []
-    async with pool.acquire() as conn:
-        for row in await conn.fetch(query):
-            results.append({
-                'artist': row.artist_id,
-                'title': row.title,
-                'id': row.id,
-            })
-
-    all_artists = dict()
-    async with pool.transaction() as conn:
-        for row in await conn.fetch(db.artist.select()):
-            all_artists[row.id] = row.name
-
-    for result in results:
-        result['artist'] = all_artists[result['artist']]
-
-    print(results)
+        result_ids.sort(key=lambda item: item[1])
+        result_ids = [int(res[0]) for res in result_ids]
+        results = await db.get_songs_by_ids(request.app['pool'], result_ids)
+    else:
+        results = []
 
     page_param = request.query.get('page')
     if page_param and page_param.isdigit() and int(page_param) > 0:
@@ -165,21 +145,18 @@ async def search_api_view(request):
     else:
         page = 1
 
+    max_pages = int(math.ceil(len(results)/10)) or 1
+    if (max_pages < 2 and page != 1) or page > max_pages:
+        return web.HTTPNotFound()
+
     response_json = {
-        "pages": {},
-        "results": results
-    }
-    max_pages = int(math.ceil(len(results)//10))
-    if page == 1 or page > max_pages:
-        response_json['pages'].update({
-            'current': 1,
-            'max': max_pages
-        })
-    else:
-        response_json['pages'].update({
+        "results": results[10*(page-1):10*page],
+        "total_items": len(results),
+        "pages": {
             'current': page,
             'max': max_pages
-        })
+        }
 
+    }
 
     return web.json_response(response_json, dumps=own_dumps)
