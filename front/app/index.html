@@ -46,6 +46,15 @@
             </div>
             <div id="navbar" class="navbar-collapse collapse navbar-responsive-collapse">
                 <ul class="nav navbar-nav">
+                    <li>
+                        <form class="navbar-form">
+                        <input type="text"
+                            class="form-control"
+                            placeholder="Search"
+                            ng-model="searchQuery"
+                            ng-keydown="search($event)">
+                        </form>
+                    </li>
                 </ul>
                 <ul class="nav navbar-nav navbar-right">
                     <li>
@@ -67,6 +76,155 @@
             </div>
         </div>
     </nav>
+    <div class="container main-container container-padding">
+        <div class="row row-content">
+            <!--div class="col-xs-12" style="padding-bottom: 20px;">
+                <div class="input-group input-group-sm">
+                    <input type="text" 
+                        placeholder="Song name here"
+                        class="form-control"
+                        ng-model="searchQuery"/>
+                    <span class="input-group-btn">
+                        <button type="submit"
+                            class="btn btn-inverse btn-sm btn-search"
+                            ng-disabled="searchQuery">
+                            Search
+                        </button>
+                    </span>
+                </div>
+            </div-->
+            <div class="col-xs-12 col-sm-7">
+                <ng-view></ng-view>
+            </div>
+            <div class="col-xs-12 col-sm-5">
+                <div id="nowInGroup">
+                    <div class="well centered-content" id="userPanel">
+                        <h3 class="list-group-item-heading">Proposed songs:</h3>
+                        <table class="table table-striped table-hover ">
+                            <tr ng-attr-class="{{(song.id == nowplaying) ? 'success': ''}}"
+                                ng-repeat="song in proposed">
+                                <td>
+                                    <a ng-href="#/songs/{{song.id}}" style="text-decoration: none; color: inherit;1">
+                                        {{song.artist}} - {{song.title}}
+                                    </a>
+                                </td>
+                            </tr>
+                        </table>
+                        <a class="btn btn-danger btn-md" ng-click="leave()">Leave group</a>`
+                    </div>
+                    <div id="leaderPanel" class="well">
+                        <!--span class="list-group-item" ng-repeat="song in proposed track by $index" style="padding: 0">
+                            <a ng-href="#/{{song.id}}" ng-attr-class="{{(song.id == nowplaying) ? 'list-group-item list-group-item-success proposed-info': 'list-group-item proposed-info'}}" >
+                                <p id="songMenu{{song.id}}" class="list-group-item-heading btn-group btn-group-justified" style="display: none;">
+                                    <span class="btn btn-danger" ng-click="deleteProposed(song.id)">Del</span>
+                                    <span class="btn btn-success" ng-click="play(song.id)" ng-show="nowplaying != song.id">Play</span>
+                                </p>
+                                <p  id="songDisp{{song.id}}" class="list-group-item-headi1ng">
+                                    {{song.artist}} - {{song.title}}
+                                </p>
+                            </a>
+                            <div class="btn btn-warning proposed-button" ng-click="toggleMenu(song.id)">
+                            <h5>M</h5>
+                            </div>
+                        </span-->
+                        <table class="table table-striped table-hover">
+                            <tbody>
+                                <tr ng-repeat="song in proposed track by $index"
+                                    ng-attr-class="{{(song.id == nowplaying) ? 'success': ''}}"
+                                    ng-href="#/songs/{{song.id}}">
+                                    <td id="songDisp{{song.id}}" style="vertical-align: middle;">
+                                        {{song.artist}} - {{song.title}}
+                                    </td>
+                                    <td>
+                                        <div class="btn-group pull-right">
+                                            <button class="btn btn-danger btn-xs"
+                                            ng-click="deleteProposed(song.id)">
+                                                <i class="material-icons" style="font-size: 18px;">delete</i>
+                                            </button>
+                                            <button class="btn btn-success btn-xs"
+                                                ng-click="play(song.id)"
+                                                ng-show="nowplaying != song.id">
+                                                <i class="material-icons" style="font-size: 18px;">play_arrow</i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                    <!--td>
+                                        <div class="btn-group">
+                                            <a href="bootstrap-elements.html"
+                                                data-target="#"
+                                                class="btn dropdown-toggle btn-xs"
+                                                data-toggle="dropdown">  
+                                                <i class="material-icons" style="font-size: 18px;">settings</i>
+                                            </a>
+                                            <ul class="dropdown-menu">
+                                                <li><a ng-click="deleteProposed(song.id)">
+                                                    Delete
+                                                </a></li>
+                                                <li><a ng-click="play(song.id)"
+                                                    ng-show="nowplaying != song.id">
+                                                    Play
+                                                </a></li>
+                                            </ul>
+                                        </div>
+                                    </td-->
+                                </tr>
+                            </tbody>
+                        </table>
+                        <p>
+                            <div class="btn-group btn-group-justified">
+                                <a class="btn btn-danger" ng-click="delete()">Delete group</a>
+                            </div>
+                        </p>
+                    </div>
+                </div>
+                <div id="notInGroup">
+                    <div class="panel panel-default centered-content">
+                        <div class="panel-heading">Join your friends in a group!</div>
+                        <div class="panel-body">
+                            <p>Create or enter a group to enjoy full singing party experience!</p>
+                        </div>
+                        <div class="panel-footer">
+                            <div class="btn-group btn-group-justified">
+                                <a class="btn btn-primary btn-sm" data-toggle="modal" data-target="#createGroupModal">Create</a>
+                                
+                                <a class="btn btn-info btn-sm" data-toggle="modal" data-target="#joinGroupModal">Enter</a>
+                            </div>
+                            <!--div class="btn-group-vertical">
+                                <a class="btn btn-primary btn-md" data-toggle="modal" data-target="#createGroupModal">Create a group</a>
+                                
+                                <a class="btn btn-info btn-sm" data-toggle="modal" data-target="#joinGroupModal">Enter a group</a>
+                            </div-->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+ <!--input class="form-control" placeholder="Search for a song"></input>
+                <div class="list-group">
+                    <a href="#" class="list-group-item">
+                        <p class="list-group-item-heading">Трубецкой - Манифест</p>
+                    </a>
+                    <a href="#" class="list-group-item">
+                        <p class="list-group-item-heading">Трубецкой - Манифест</p>
+                    </a>
+                    <a href="#" class="list-group-item">
+                        <p class="list-group-item-heading">Трубецкой - Манифест</p>
+                    </a>
+                </div-->
+    <!--footer class="row-footer">
+                <div class="col-xs-12 col-sm-4">
+                    <div class="nav navbar-nav" style="padding: 40px 10px;">
+                        <a class="btn btn-social-icon btn-google-plus" href="http://google.com/+"><i class="fa fa-google-plus"></i></a>
+                        <a class="btn btn-social-icon btn-facebook" href="http://www.facebook.com/profile.php?id="><i class="fa fa-facebook"></i></a>
+                        <a class="btn btn-social-icon btn-linkedin" href="http://www.linkedin.com/in/"><i class="fa fa-linkedin"></i></a>
+                        <a class="btn btn-social-icon btn-twitter" href="http://twitter.com/"><i class="fa fa-twitter"></i></a>
+                        <a class="btn btn-social-icon btn-youtube" href="http://youtube.com/"><i class="fa fa-youtube"></i></a>
+                        <a class="btn btn-social-icon" href="mailto:"><i class="fa fa-envelope-o"></i></a>
+                    </div>
+                </div>
+    </footer-->
+
     <div id="addSongModal" class="modal fade" role="dialog">
         <div class="modal-dialog">
         <!-- Modal content-->
@@ -200,159 +358,6 @@
         </div>
     </div>
 
-    <div class="container main-container container-padding">
-        <div class="row row-content">
-            <div class="col-xs-12 col-sm-3">
-                <div class="panel panel-default" ng-controller="SearchController">
-                    <div ng-show="showMessage" class="panel-heading">
-                        {{message}}
-                    </div>
-                    <div ng-show="!showMessage">
-                        <div class="list-group-item">
-                            <input ng-model="searchText" class="form-control " for="searchList">
-                        </div>
-                          <div class="list-group-separator"></div>
-                        <div class="list-group search-limiter" id="searchList">
-                            <div ng-repeat="song in songsInfo | filter:searchText">
-                            <a class="list-group-item" href="#/{{song.id}}">
-                                <div>
-                                    {{song.artist}} - {{song.title}}
-                                </div>
-                            </a>
-                              <div class="list-group-separator"></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-xs-12 col-sm-6">
-                <ng-view></ng-view>
-            </div>
-            <div class="col-xs-12 col-sm-3">
-                <div id="nowInGroup">
-                    <div class="well centered-content" id="userPanel">
-                        <div class="list-group">
-                            <a class="list-group-item disabled">
-                                <p class="list-group-item-heading">Proposed songs:</p>
-                            </a>
-                            <a ng-href="#/{{song.id}}" ng-attr-class="{{(song.id == nowplaying) ? 'list-group-item list-group-item-success': 'list-group-item '}}" ng-repeat="song in proposed">
-                                <p class="list-group-item-headng">
-                                    {{song.artist}} - {{song.title}}
-                                </p>
-                            </a>
-                        </div>
-                        <a class="btn btn-danger btn-md" ng-click="leave()">Leave group</a>`
-                    </div>
-                    <div id="leaderPanel" class="well">
-                        <!--span class="list-group-item" ng-repeat="song in proposed track by $index" style="padding: 0">
-                            <a ng-href="#/{{song.id}}" ng-attr-class="{{(song.id == nowplaying) ? 'list-group-item list-group-item-success proposed-info': 'list-group-item proposed-info'}}" >
-                                <p id="songMenu{{song.id}}" class="list-group-item-heading btn-group btn-group-justified" style="display: none;">
-                                    <span class="btn btn-danger" ng-click="deleteProposed(song.id)">Del</span>
-                                    <span class="btn btn-success" ng-click="play(song.id)" ng-show="nowplaying != song.id">Play</span>
-                                </p>
-                                <p  id="songDisp{{song.id}}" class="list-group-item-headi1ng">
-                                    {{song.artist}} - {{song.title}}
-                                </p>
-                            </a>
-                            <div class="btn btn-warning proposed-button" ng-click="toggleMenu(song.id)">
-                            <h5>M</h5>
-                            </div>
-                        </span-->
-                        <table class="table table-striped table-hover">
-                            <tbody>
-                                <tr ng-repeat="song in proposed track by $index"
-                                    ng-attr-class="{{(song.id == nowplaying) ? 'success': ''}}"
-                                    ng-href="#/{{song.id}}">
-                                    <td id="songDisp{{song.id}}" style="vertical-align: middle;">
-                                        {{song.artist}} - {{song.title}}
-                                    </td>
-                                    <td style="display: none;" id="songMenu{{song.id}}" >
-                                        <span class="btn btn-danger btn-xs"
-                                            ng-click="deleteProposed(song.id)">
-                                            <i class="material-icons" style="font-size: 18px;">delete</i>
-                                        </span>
-                                        <span class="btn btn-success btn-xs"
-                                            ng-click="play(song.id)"
-                                            ng-show="nowplaying != song.id">
-                                            <i class="material-icons" style="font-size: 18px;">play arrow</i>
-                                        </span>
-                                    </td>
-                                    <td>
-                                        <div class="btn-group">
-                                            <a href="bootstrap-elements.html"
-                                                data-target="#"
-                                                class="btn dropdown-toggle btn-xs"
-                                                data-toggle="dropdown">  
-                                                <i class="material-icons" style="font-size: 18px;">settings</i>
-                                            </a>
-                                            <ul class="dropdown-menu">
-                                                <li><a ng-click="deleteProposed(song.id)">
-                                                    Delete
-                                                </a></li>
-                                                <li><a ng-click="play(song.id)"
-                                                    ng-show="nowplaying != song.id">
-                                                    Play
-                                                </a></li>
-                                            </ul>
-                                        </div>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                        <p>
-                            <div class="btn-group btn-group-justified">
-                                <a class="btn btn-danger" ng-click="delete()">Delete group</a>
-                            </div>
-                        </p>
-                    </div>
-                </div>
-                <div id="notInGroup">
-                    <div class="panel panel-default centered-content">
-                        <div class="panel-heading">Join your friends in a group!</div>
-                        <div class="panel-body">
-                            <p>Create or enter a group to enjoy full singing party experience!</p>
-                        </div>
-                        <div class="panel-footer">
-                            <div class="btn-group btn-group-justified">
-                                <a class="btn btn-primary btn-sm" data-toggle="modal" data-target="#createGroupModal">Create</a>
-                                
-                                <a class="btn btn-info btn-sm" data-toggle="modal" data-target="#joinGroupModal">Enter</a>
-                            </div>
-                            <!--div class="btn-group-vertical">
-                                <a class="btn btn-primary btn-md" data-toggle="modal" data-target="#createGroupModal">Create a group</a>
-                                
-                                <a class="btn btn-info btn-sm" data-toggle="modal" data-target="#joinGroupModal">Enter a group</a>
-                            </div-->
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
- <!--input class="form-control" placeholder="Search for a song"></input>
-                <div class="list-group">
-                    <a href="#" class="list-group-item">
-                        <p class="list-group-item-heading">Трубецкой - Манифест</p>
-                    </a>
-                    <a href="#" class="list-group-item">
-                        <p class="list-group-item-heading">Трубецкой - Манифест</p>
-                    </a>
-                    <a href="#" class="list-group-item">
-                        <p class="list-group-item-heading">Трубецкой - Манифест</p>
-                    </a>
-                </div-->
-    <!--footer class="row-footer">
-                <div class="col-xs-12 col-sm-4">
-                    <div class="nav navbar-nav" style="padding: 40px 10px;">
-                        <a class="btn btn-social-icon btn-google-plus" href="http://google.com/+"><i class="fa fa-google-plus"></i></a>
-                        <a class="btn btn-social-icon btn-facebook" href="http://www.facebook.com/profile.php?id="><i class="fa fa-facebook"></i></a>
-                        <a class="btn btn-social-icon btn-linkedin" href="http://www.linkedin.com/in/"><i class="fa fa-linkedin"></i></a>
-                        <a class="btn btn-social-icon btn-twitter" href="http://twitter.com/"><i class="fa fa-twitter"></i></a>
-                        <a class="btn btn-social-icon btn-youtube" href="http://youtube.com/"><i class="fa fa-youtube"></i></a>
-                        <a class="btn btn-social-icon" href="mailto:"><i class="fa fa-envelope-o"></i></a>
-                    </div>
-                </div>
-    </footer-->
     <!-- build:js scripts/main.js -->
     <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
     <script src="../node_modules/bootstrap-material-design/bower_components/jquery/dist/jquery.min.js"></script>
@@ -366,6 +371,7 @@
     <script src="./scripts/app.js" type="text/javascript"></script>
     <script src="./scripts/services.js" type="text/javascript"></script>
     <script src="./scripts/controllers.js" type="text/javascript"></script>
+    <script src="./scripts/dirPagination.js" type="text/javascript"></script>
     <!-- endbuild -->
 </body>
 

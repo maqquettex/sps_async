@@ -1,8 +1,6 @@
 'use strict';
 
 angular.module('sps')
-    .constant("httpBaseUrl","http://localhost:80/")
-    .constant("wsBaseUrl","ws://localhost:4000/party")
     .factory('songFactory',['$http', 'httpBaseUrl', function($http,httpBaseUrl) {
         var songfac = {};
         var inGroup = false;

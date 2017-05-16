@@ -32,7 +32,25 @@ angular.module('sps')
         }
     );
 }])
-.controller('GroupController', ['$scope', 'groupFactory', 'songFactory', '$websocket', '$location', function($scope, groupFactory, songFactory, $websocket, $location) {
+.controller('GroupController', ['$scope', 'groupFactory', 'songFactory', '$websocket', '$location', '$rootScope', '$route',
+function($scope, groupFactory, songFactory, $websocket, $location, $rootScope, $route) {
+    
+    $scope.searchQuery = "";
+    $scope.search = function($event) {
+        if ($event.keyCode != 13 || $scope.searchQuery === "") {
+            return;
+        }
+        $rootScope.searchQ = $scope.searchQuery;
+        if ($location.path() == '/search') {
+            $route.reload();
+        }
+        else {
+            $location.path("/search");
+        }
+    }
+
+
+
     hideit();
     var newSong = {};
     $scope.addSongArtist = '';
@@ -489,10 +507,15 @@ angular.module('sps')
 
     }
 }])
-.controller('SearchController', ['$scope', 'songFactory', function($scope, songFactory) {
+.controller('SearchController', ['$scope', 'songFactory', '$http', 'httpBaseUrl', '$rootScope', '$location',
+function($scope, songFactory, $http, baseUrl, $rootScope, $location) {
     $scope.message = 'Loading...';
     $scope.showMessage = true;
-    $scope.searchText = "";
+    $scope.searchText = $rootScope.searchQ;
+    $scope.itemsPerPage = 10;
+    $scope.totalItems = 0;
+    $scope.songs = [];
+    $scope.found = false;
     /*$scope.artists = songFactory.getArtists().then(
         function(response) {
             $scope.artists = response.data;
@@ -503,14 +526,24 @@ angular.module('sps')
             $scope.showMessage = true;
         }
     );*/
-    $scope.songsInfo = songFactory.getSongsInfo().then(
-        function(response) {
-            $scope.songsInfo = response.data;
-            $scope.showMessage = false;
-        },
-        function(response) {
-            $scope.message = "Something went wrong: "+response.status + " " + response.statusText;
-            $scope.showMessage = true;
-        }
-    );
+    $scope.searcher = function(pageNumber) {
+        console.log(baseUrl + 'api/search?q=' + $scope.searchText + '&page=' + pageNumber);
+        $http.get(baseUrl + 'api/search?q=' + $scope.searchText + '&page=' + pageNumber)
+        .then(function(response) {
+            console.log(response);
+            $scope.songs = response.data.results;
+            $scope.totalItems = (response.data.pages.max * 10) - 3;
+            if (response.data.results.length > 0) {
+                $scope.found = true;
+            }
+        }, function(response) {
+            console.log(response);
+        });
+    };
+    if (angular.isUndefined($rootScope.searchQ)) {
+        $location.path('/');
+    }
+    if ($scope.searchText !== '') {
+        $scope.searcher(1);
+    }
 }]);
