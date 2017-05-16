@@ -32,6 +32,8 @@ services:
       - aiohttp
     volumes:
       - ./front/app:/static
+      - ./front/node_modules:/static/node_modules
+      - ./front/bower_components:/static/bower_components
 
   aiohttp:
     build: ./sps
