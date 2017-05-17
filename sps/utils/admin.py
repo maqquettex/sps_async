@@ -1,3 +1,4 @@
+import json
 import aiopg.sa
 import aiohttp_security
 import aiohttp_admin
@@ -8,6 +9,7 @@ from aiohttp_admin.security import DummyAuthPolicy, DummyTokenIdentityPolicy
 
 from api.db import song, artist
 from parties.db import party
+from utils.elastic import *
 
 
 __all__ = ('init_admin', )
@@ -20,6 +22,7 @@ async def init_admin(app, loop):
 
 async def get_admin_subapp(app, loop):
     pg = await init_admin_engine(loop, app['conf']['postgres'])
+    es = app['elastic']
 
     async def close_pg(app):
         pg.close()
@@ -29,7 +32,7 @@ async def get_admin_subapp(app, loop):
 
 
     admin_config_path = str(aiohttp_admin.PROJ_ROOT / 'static' / 'js')
-    admin = setup_admin(app, pg, admin_config_path)
+    admin = setup_admin(app, pg, es, admin_config_path)
     return admin
 
 async def init_admin_engine(loop, db_conf):
@@ -43,9 +46,41 @@ async def init_admin_engine(loop, db_conf):
     return engine
 
 
-def setup_admin(app, pg, admin_config_path):
-    resources = (PGResource(pg, artist, url='artist'),
-                 PGResource(pg, song, url='song'),
+class ElasticResource(PGResource):
+    def __init__(self, db, es, table, primary_key='id', url=None):
+        self._es = es
+        super().__init__(db, table, primary_key, url)
+
+    async def update(self, request):
+        response = await super().update(request)
+        await self.index_elastic(response)
+        return response
+
+    async def create(self, request):
+        response = await super().create(request)
+        await self.index_elastic(response)
+        return response
+
+
+class SongResource(ElasticResource):
+    async def index_elastic(self, response):
+        await update_song_by_id(
+            pg=self._db, es=self._es,
+            id=json.loads(response.body)['id']
+        )
+
+
+class ArtistResource(ElasticResource):
+    async def index_elastic(self, response):
+        await update_song_by_artist(
+            pg=self._db, es=self._es,
+            artist_id=json.loads(response.body)['id']
+        )
+
+
+def setup_admin(app, pg, es, admin_config_path):
+    resources = (ArtistResource(pg, es, artist, url='artist'),
+                 SongResource(pg, es, song, url='song'),
                  PGResource(pg, party, url='party', primary_key='password'))
     admin = aiohttp_admin.setup(app, admin_config_path, resources=resources)
 

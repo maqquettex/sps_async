@@ -8,6 +8,7 @@ from utils.middlewares import *
 import utils.admin
 import utils.jinja
 import utils.connections
+import utils.elastic
 
 
 async def init_application(loop):
@@ -16,13 +17,15 @@ async def init_application(loop):
         # List of middlewares is here
         cors_headers_middleware,
         trailing_slash_redirect_middleware,
-        elastic_index_middleware,
+        # elastic_index_middleware,
     ]
     app = web.Application(loop=loop, middlewares=middlewares)
 
     await utils.connections.init_postgres(app, loop)
     await utils.connections.init_redis(app, loop)
     await utils.connections.init_elasticsearch(app, loop)
+
+    await utils.elastic.update_all_indexes(app['elastic'], app['pool'])
 
     # SECTION: sub-apps
     app['apps'] = {}  # dictionary for apps to store any info at

@@ -1,7 +1,9 @@
 from api.db import song, artist
+from sqlalchemy import join, select
 
 
-async def update_indexes(es, pg):
+
+async def update_all_indexes(es, pg):
 
     songs = []
     query = song.select()
@@ -33,5 +35,51 @@ async def update_indexes(es, pg):
                 'artist': all_artists[s['artist']].lower(),
             },
             id=s['id']
+        )
+
+
+
+async def update_song_by_id(pg, es, id):
+    query = song.join(artist, song.c.artist_id == artist.c.id)
+    query = select([
+        song.c.id,
+        song.c.title,
+        artist.c.name
+    ]).where(song.c.id == id).select_from(query)
+
+    async with pg.acquire() as conn:
+        song_row = await conn.execute(query)
+        song_row = await song_row.fetchone()
+    await es.index(
+        index='library',
+        doc_type='song',
+        body={
+            'title': song_row[song.c.title].lower(),
+            'artist': song_row[artist.c.name].lower(),
+        },
+        id=song_row[song.c.id]
+    )
+
+
+async def update_song_by_artist(pg, es, artist_id):
+    query = song.join(artist, song.c.artist_id == artist.c.id)
+    query = select([
+        song.c.id,
+        song.c.title,
+        artist.c.name
+    ]).where(song.c.artist_id == artist_id).select_from(query)
+
+    async with pg.acquire() as conn:
+        song_rows = await conn.execute(query)
+
+    for song_row in await song_rows.fetchall() :
+        await es.index(
+            index='library',
+            doc_type='song',
+            body={
+                'title': song_row[song.c.title].lower(),
+                'artist': song_row[artist.c.name].lower(),
+            },
+            id=song_row[song.c.id]
         )
 

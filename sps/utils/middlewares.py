@@ -1,5 +1,5 @@
 from aiohttp import web
-from .elastic import update_indexes
+from .elastic import update_all_indexes
 
 async def trailing_slash_redirect_middleware(app, handler):
     async def redirect_handler(request):
@@ -32,7 +32,7 @@ async def elastic_index_middleware(app, handler):
             if request.path.startswith('/admin'):
                 # I think this one should be implemented better
                 # In matter of urgency, doing it with the silly way
-                await update_indexes(
+                await update_all_indexes(
                     es=app['elastic'], pg=app['pool']
                 )
         return await handler(request)
