@@ -36,10 +36,5 @@ link_prod:
 dump:
 	docker-compose exec db pg_dump $(POSTGRES_DB) -U $(POSTGRES_USER) > sps-$(shell date +%Y-%m-%d-%H:%M:%S).sql
 
-clean:
-	docker-compose stop
-	docker-compose rm -vf
-	docker rmi $(docker images | grep "^<none>" | awk "{print $3}")
-
 admin_conf:
 	python sps/manage.py admin_config
