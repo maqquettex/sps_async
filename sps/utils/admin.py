@@ -9,8 +9,7 @@ from aiohttp_admin.security import DummyAuthPolicy, DummyTokenIdentityPolicy
 
 from api.db import song, artist
 from parties.db import party
-from utils.elastic import update_song_by_artist, \
-    update_song_by_id, update_all_indexes
+from utils.elastic import update_song_by_artist, update_song_by_id
 
 
 __all__ = ('init_admin', )
