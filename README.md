@@ -1,4 +1,5 @@
 ![Coverage](https://codecov.io/gh/maqquettex/sps_async/branch/dev/graph/badge.svg)
+![TravisBuild](https://travis-ci.org/maqquettex/sps_async.svg?branch=dev)
 # sps_async
 Song Party Service v2 (powered by asyncio and aiohttp)
 
