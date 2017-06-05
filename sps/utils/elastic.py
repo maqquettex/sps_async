@@ -1,5 +1,5 @@
 from api.db import song, artist
-from sqlalchemy import join, select
+from sqlalchemy import select
 
 
 async def update_all_indexes(es, pg):

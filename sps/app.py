@@ -4,7 +4,7 @@ from aiohttp import web
 
 import api
 import parties
-from utils.middlewares import *
+import utils.middlewares
 import utils.admin
 import utils.jinja
 import utils.connections
@@ -15,8 +15,8 @@ async def init_application(loop):
 
     middlewares = [
         # List of middlewares is here
-        cors_headers_middleware,
-        trailing_slash_redirect_middleware,
+        utils.middlewares.cors_headers_middleware,
+        utils.middlewares.trailing_slash_redirect_middleware,
         # elastic_index_middleware,
     ]
     app = web.Application(loop=loop, middlewares=middlewares)
