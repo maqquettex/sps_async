@@ -6,8 +6,8 @@ python:
   - "3.6-dev" # 3.6 development branch
 install:
   pip install flake8 pytest-cov coveralls
-before_script:
-  flake8 ./sps
+#before_script:
+  #flake8 ./sps
 # command to run tests
 script:
   py.test --cov=./sps ./sps
