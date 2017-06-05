@@ -1,3 +1,5 @@
+![sample text](https://codecov.io/gh/maqquettex/sps_async/branch/master/graph/badge.svg)
+
 # sps_async
 Song Party Service v2 (powered by asyncio and aiohttp)
 
