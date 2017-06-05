@@ -28,7 +28,6 @@ party = sa.Table(
 )
 
 
-
 async def create_tables_sql(app):
     async with app['pool'].acquire() as conn:
         try:
@@ -98,6 +97,7 @@ async def get_party_by_token(pool, token):
 
     return None
 
+
 async def clean_expired(redis, pg):
     print(1)
     expired = []
@@ -130,9 +130,3 @@ async def clean_expired(redis, pg):
         await redis.delete('party:{}:update'.format(password))
         await redis.delete('party:{}:current'.format(password))
         await redis.delete('party:{}:proposed'.format(password))
-
-
-
-
-
-

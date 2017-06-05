@@ -40,6 +40,7 @@ async def init_application(loop):
     await utils.admin.init_admin(app, loop)
     return app
 
+
 def main():
     loop = asyncio.get_event_loop()
 
@@ -47,6 +48,7 @@ def main():
     web.run_app(app,
                 host=os.getenv('SERVER_HOST', '127.0.0.1'),
                 port=int(os.getenv('SERVER_PORT', 4000)))
+
 
 if __name__ == '__main__':
     main()

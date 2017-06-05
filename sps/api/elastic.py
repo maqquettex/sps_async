@@ -2,13 +2,12 @@
 async def get_by_title(es, query):
 
     body_query = {
-        "match_phrase_prefix" : {
-            "title" : {
-                "query" : query
-                }
+        "match_phrase_prefix": {
+            "title": {
+                "query": query
             }
         }
-
+    }
 
     res = await es.search(
         index='library',
@@ -36,6 +35,5 @@ async def get_by_artist(es, query):
         body={"query": body_query},
         _source=False
     )
-
 
     return [(hit['_id'], hit['_score']) for hit in res['hits']['hits']]

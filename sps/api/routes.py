@@ -1,4 +1,4 @@
-from .views import *
+from .views import SongsApiView, ArtistsApiView, search_api_view
 
 
 def setup_routes(app, prefix=None):

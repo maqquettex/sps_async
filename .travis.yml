@@ -7,7 +7,7 @@ python:
 install:
   pip install flake8 pytest-cov codecov
 before_script:
-  flake8 ./sps
+  flake8 --ignore E999,E501 --exclude *__init__.py  ./sps
 # command to run tests
 script:
   py.test --cov=./sps ./sps

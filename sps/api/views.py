@@ -22,7 +22,7 @@ class SongsApiView:
             base_url = '/' + prefix + base_url
 
         app.router.add_get(base_url, SongsApiView.list, name='songs_list')
-        app.router.add_get(base_url +'/{id}', SongsApiView.retrieve, name='songs_retrieve')
+        app.router.add_get(base_url + '/{id}', SongsApiView.retrieve, name='songs_retrieve')
 
     @staticmethod
     async def list(request):
@@ -30,7 +30,7 @@ class SongsApiView:
 
         if artist.isdigit():
             artist_id = int(artist)
-            artist_to_text=False
+            artist_to_text = False
         elif artist == 'name':
             artist_id = None
             artist_to_text = True
@@ -74,7 +74,7 @@ class ArtistsApiView:
             base_url = '/' + prefix + base_url
 
         app.router.add_get(base_url, ArtistsApiView.list, name='artists_list')
-        app.router.add_get(base_url +'/{id}', ArtistsApiView.retrieve, name='artists_retrieve')
+        app.router.add_get(base_url + '/{id}', ArtistsApiView.retrieve, name='artists_retrieve')
 
     @staticmethod
     async def list(request):
@@ -107,7 +107,6 @@ class ArtistsApiView:
             return web.json_response(artist, dumps=own_dumps)
 
 
-
 async def search_api_view(request):
     es = request.app['elastic']
 
@@ -123,7 +122,6 @@ async def search_api_view(request):
     else:
         result_ids.extend(await elastic.get_by_title(es, query))
         result_ids.extend(await elastic.get_by_artist(es, query))
-
 
     if result_ids:
         flattened = {}
@@ -145,12 +143,12 @@ async def search_api_view(request):
     else:
         page = 1
 
-    max_pages = int(math.ceil(len(results)/10)) or 1
+    max_pages = int(math.ceil(len(results) / 10)) or 1
     if (max_pages < 2 and page != 1) or page > max_pages:
         return web.HTTPNotFound()
 
     response_json = {
-        "results": results[10*(page-1):10*page],
+        "results": results[10 * (page - 1):10 * page],
         "total_items": len(results),
         "pages": {
             'current': page,

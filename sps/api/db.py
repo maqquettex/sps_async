@@ -35,7 +35,6 @@ async def get_songs(pool, artist_id=None, artists_to_text=None, notext=None):
 
     query = song.select()
 
-
     if artist_id:
         query = query.where(song.c.artist_id == artist_id)
 
@@ -63,6 +62,7 @@ async def get_songs(pool, artist_id=None, artists_to_text=None, notext=None):
             result.pop('text')
 
     return results
+
 
 async def get_single_song(pool, song_id, artist_to_text=None):
     query = song.select().where(song.c.id == song_id)
@@ -100,6 +100,7 @@ async def get_artists(pool):
     return [{'id': row.id,
              'name': row.name,
              } for row in results]
+
 
 async def get_single_artist(pool, artist_id, select_songs=None, full_songs=None):
     query = artist.select().where(artist.c.id == artist_id)

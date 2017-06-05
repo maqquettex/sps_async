@@ -2,7 +2,6 @@ from api.db import song, artist
 from sqlalchemy import join, select
 
 
-
 async def update_all_indexes(es, pg):
 
     songs = []
@@ -38,7 +37,6 @@ async def update_all_indexes(es, pg):
         )
 
 
-
 async def update_song_by_id(pg, es, id):
     query = song.join(artist, song.c.artist_id == artist.c.id)
     query = select([
@@ -72,7 +70,7 @@ async def update_song_by_artist(pg, es, artist_id):
     async with pg.acquire() as conn:
         song_rows = await conn.execute(query)
 
-    for song_row in await song_rows.fetchall() :
+    for song_row in await song_rows.fetchall():
         await es.index(
             index='library',
             doc_type='song',
@@ -82,4 +80,3 @@ async def update_song_by_artist(pg, es, artist_id):
             },
             id=song_row[song.c.id]
         )
-

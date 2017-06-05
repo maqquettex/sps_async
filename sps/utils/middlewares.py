@@ -1,6 +1,7 @@
 from aiohttp import web
 from .elastic import update_all_indexes
 
+
 async def trailing_slash_redirect_middleware(app, handler):
     async def redirect_handler(request):
         if request.path.endswith('/'):

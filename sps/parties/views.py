@@ -14,7 +14,6 @@ def own_dumps(*args, **kwargs):
     return json.dumps(*args, **kwargs)
 
 
-
 async def create_party(request):
     # At every creation - clean expired
     await db.clean_expired(request.app['redis'], request.app['pool'])
@@ -35,8 +34,8 @@ async def create_party(request):
     redis = request.app['redis']
     party_key = 'party:{}'.format(request.match_info['password'])
 
-    await redis.set(party_key+':updated', datetime.now().strftime(DATETIME_FORMAT))
-    await redis.set(party_key+':current', 0)
+    await redis.set(party_key + ':updated', datetime.now().strftime(DATETIME_FORMAT))
+    await redis.set(party_key + ':current', 0)
     await redis.delete(party_key + ':proposed', 0)
 
     return web.json_response(
@@ -123,6 +122,3 @@ async def websocket_handler(request):
             party_waiters.remove(ws)
 
     return ws
-
-
-

@@ -1,4 +1,4 @@
-from .views import *
+from .views import create_party, register_in_party, websocket_handler
 
 
 def setup_routes(app, prefix=None):

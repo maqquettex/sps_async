@@ -1,8 +1,8 @@
 """
 Here connections to databases (SQL and NoSQL) are created
 Functions defined here should take care of:
- * configuring connection 
- * creating connection 
+ * configuring connection
+ * creating connection
  * gracefully closing connections
 """
 import os

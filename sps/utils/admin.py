@@ -30,10 +30,10 @@ async def get_admin_subapp(app, loop):
 
     app.on_cleanup.append(close_pg)
 
-
     admin_config_path = str(aiohttp_admin.PROJ_ROOT / 'static' / 'js')
     admin = setup_admin(app, pg, es, admin_config_path)
     return admin
+
 
 async def init_admin_engine(loop, db_conf):
     engine = await aiopg.sa.create_engine(
@@ -102,7 +102,7 @@ def generate_ng_admin_config():
     ]
 
     config_str = generate_config(entities, base_url)
-    config_path = str(aiohttp_admin.PROJ_ROOT / 'static' / 'js' / 'new_ng_config.js')
+    config_path = str(aiohttp_admin.PROJ_ROOT / 'static/js/new_ng_config.js')
     print('New config saved at {}'.format(config_path))
 
     with open(config_path, 'w') as file:
